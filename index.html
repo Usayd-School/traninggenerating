@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز التوليد السحابي الشامل | مدرسة أسيد بن حضير</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); }
+        
+        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; transition: height 0.3s ease; }
+        .card-nafes::before { background: linear-gradient(to right, #10b981, #059669); }
+        .card-teachers::before { background: linear-gradient(to right, #3b82f6, #2563eb); }
+        .card-leadership::before { background: linear-gradient(to right, #8b5cf6, #6d28d9); }
+        .card-behavior::before { background: linear-gradient(to right, #f59e0b, #d97706); }
+        .glass-card:hover::before { height: 8px; }
+
+        .generating-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 10; align-items: center; justify-content: center; flex-direction: column; }
+        
+        .fade-in { animation: fadeInUp 0.8s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="selection:bg-brand-500 selection:text-white">
+
+    <!-- Navbar -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-white flex items-center justify-center text-xl shadow-lg">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-xl font-black text-slate-900">مركز التوليد السحابي للبرامج</h1>
+                    <p class="text-[10px] sm:text-xs text-brand-600 font-bold">إنشاء ورفع الحقائب التدريبية بضغطة زر</p>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-4 py-2 rounded-xl">
+                <span id="db-status" class="text-xs font-black text-slate-700"><i class="fa-solid fa-circle-notch fa-spin text-amber-500 ml-1"></i> جاري الاتصال...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        
+        <div class="text-center max-w-3xl mx-auto fade-in">
+            <h2 class="text-3xl font-black text-slate-900 mb-4">أهم البرامج لرفع تقييم المدرسة</h2>
+            <p class="text-slate-500 font-semibold leading-relaxed">
+                هذه المنصة مستقلة تماماً، تعمل على توليد الحقائب التدريبية والاختبارات المعيارية متكاملة بأسئلتها ومعاييرها، ورفعها مباشرة إلى قاعدة البيانات السحابية لتكون جاهزة للنشر في لوحات التحكم الخاصة بالمدرسة.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in" style="animation-delay: 0.2s;">
+            
+            <!-- 1. برنامج نافس -->
+            <div class="glass-card card-nafes p-6">
+                <div class="generating-overlay" id="loader-nafes">
+                    <i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-emerald-500 mb-3"></i>
+                    <p class="text-sm font-bold text-slate-700">جاري الرفع للسحابة...</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-4 border border-emerald-100 shadow-sm">
+                    <i class="fa-solid fa-ranking-star"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-900 mb-2">التهيئة لاختبارات نافس</h3>
+                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">حقيبة متكاملة للطلاب تركز على رفع مستوى التحصيل في لغتي والرياضيات لمحاكاة الاختبارات الوطنية.</p>
+                <button onclick="generator.generateProgram('nafes')" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm transition-all shadow-md">
+                    توليد ورفع البرنامج
+                </button>
+            </div>
+
+            <!-- 2. التنمية المهنية للمعلمين -->
+            <div class="glass-card card-teachers p-6">
+                <div class="generating-overlay" id="loader-teachers">
+                    <i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-blue-500 mb-3"></i>
+                    <p class="text-sm font-bold text-slate-700">جاري الرفع للسحابة...</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl mb-4 border border-blue-100 shadow-sm">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-900 mb-2">التنمية المهنية للمعلمين</h3>
+                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">برنامج تدريبي لتمهين المعلمين في استراتيجيات التعلم النشط، التقويم التكويني، والتمايز.</p>
+                <button onclick="generator.generateProgram('teachers')" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm transition-all shadow-md">
+                    توليد ورفع البرنامج
+                </button>
+            </div>
+
+            <!-- 3. القيادة المدرسية -->
+            <div class="glass-card card-leadership p-6">
+                <div class="generating-overlay" id="loader-leadership">
+                    <i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-purple-500 mb-3"></i>
+                    <p class="text-sm font-bold text-slate-700">جاري الرفع للسحابة...</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mb-4 border border-purple-100 shadow-sm">
+                    <i class="fa-solid fa-sitemap"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-900 mb-2">مجتمعات التعلم (PLCs)</h3>
+                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">حقيبة للإدارة والقيادة المدرسية تركز على التخطيط الاستراتيجي وبناء مجتمعات التعلم المهنية.</p>
+                <button onclick="generator.generateProgram('leadership')" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm transition-all shadow-md">
+                    توليد ورفع البرنامج
+                </button>
+            </div>
+
+            <!-- 4. السلوك والبيئة المدرسية -->
+            <div class="glass-card card-behavior p-6">
+                <div class="generating-overlay" id="loader-behavior">
+                    <i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-amber-500 mb-3"></i>
+                    <p class="text-sm font-bold text-slate-700">جاري الرفع للسحابة...</p>
+                </div>
+                <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl mb-4 border border-amber-100 shadow-sm">
+                    <i class="fa-solid fa-users-rays"></i>
+                </div>
+                <h3 class="text-lg font-black text-slate-900 mb-2">السلوك والمناخ المدرسي</h3>
+                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">مقياس وبرنامج لتعزيز السلوك الإيجابي، الانتماء، ونبذ التنمر لتهيئة بيئة مدرسية جاذبة.</p>
+                <button onclick="generator.generateProgram('behavior')" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm transition-all shadow-md">
+                    توليد ورفع البرنامج
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-6 mt-12 text-center">
+        <p class="text-xs font-bold text-slate-300">برمجة وتطوير: <span class="text-white font-black">أ. عاصم المشيقح</span></p>
+        <p class="text-[10px] mt-1">مركز التوليد السحابي المستقل © 2026</p>
+    </footer>
+
+    <!-- LOGIC SCRIPT -->
+    <script>
+        // إعدادات Firebase
+        const firebaseConfig = { 
+            apiKey: "AIzaSyCIW17B6y6sG_bdUFqF7FWoVIY9ynXv1B4", 
+            authDomain: "myschoolproject-4ad92.firebaseapp.com", 
+            databaseURL: "https://myschoolproject-4ad92-default-rtdb.firebaseio.com", 
+            projectId: "myschoolproject-4ad92" 
+        };
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const database = firebase.database();
+        
+        // مسار قاعدة البيانات الذي سيتم رفع البرامج إليه (يجب أن يكون نفس المسار الذي تقرأ منه لوحة التحكم الخاصة بك)
+        const dbRef = database.ref('external_eval_training_v1');
+
+        class CloudGenerator {
+            constructor() {
+                this.existingPrograms = [];
+                this.fetchData();
+            }
+
+            fetchData() {
+                dbRef.once('value', snap => {
+                    const data = snap.val();
+                    if(data) {
+                        this.existingPrograms = Array.isArray(data) ? data : Object.values(data);
+                    }
+                    document.getElementById('db-status').innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-600 ml-1"></i> متصل وجاهز للرفع';
+                });
+            }
+
+            saveToCloud(program, loaderId) {
+                document.getElementById(loaderId).style.display = 'flex';
+                
+                // محاكاة وقت الرفع لإعطاء شعور بالعملية
+                setTimeout(() => {
+                    this.existingPrograms.unshift(program);
+                    dbRef.set(this.existingPrograms)
+                        .then(() => {
+                            document.getElementById(loaderId).style.display = 'none';
+                            alert(`✅ تم توليد "${program.title}" ورفعه إلى السحابة بنجاح!`);
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            document.getElementById(loaderId).style.display = 'none';
+                            alert("❌ حدث خطأ أثناء الرفع للسحابة.");
+                        });
+                }, 1500);
+            }
+
+            generateProgram(type) {
+                const id = Date.now();
+                let programData = null;
+                let loaderId = `loader-${type}`;
+
+                if (type === 'nafes') {
+                    programData = {
+                        id: id, type: "test", title: "برنامج التهيئة لاختبارات نافس الوطنية", domain: "المجال الرابع: نواتج التعلم والتحصيل الدراسي", unitName: "الاستعداد الوطني", introText: "هذا البرنامج مصمم لرفع مهارات الطلاب في القراءة الرياضية والاستيعاب القرائي.", duration: 45, colorTheme: "emerald", targetWeight: 100, totalWeight: 100, status: "active",
+                        standardsSections: [
+                            {
+                                standardTitle: "مهارات الاستيعاب القرائي", standardWeight: 50,
+                                questions: [
+                                    { text: "اقرأ النص: 'الشمس مصدر الحياة على الأرض، تمدنا بالدفء والضوء'. الفكرة الرئيسة هي:", questionWeight: 10, qType: "اختيار من متعدد", options: ["فوائد الشمس للأرض", "حجم الشمس", "بعد الشمس عن الأرض", "أضرار الشمس"], correctAnswerIndex: 0, correctAnswer: "فوائد الشمس للأرض" },
+                                    { text: "مرادف كلمة (تمدنا) في النص السابق:", questionWeight: 10, qType: "اختيار من متعدد", options: ["تأخذ منا", "تعطينا", "تمنعنا", "تحجبنا"], correctAnswerIndex: 1, correctAnswer: "تعطينا" }
+                                ]
+                            },
+                            {
+                                standardTitle: "مهارات التفكير الرياضي", standardWeight: 50,
+                                questions: [
+                                    { text: "اشترى محمد 3 كتب قيمة كل كتاب 15 ريالاً. أعطى البائع 50 ريالاً، كم الباقي؟", questionWeight: 10, qType: "اختيار من متعدد", options: ["5 ريالات", "10 ريالات", "15 ريالاً", "لا يوجد باقي"], correctAnswerIndex: 0, correctAnswer: "5 ريالات" },
+                                    { text: "ما هو الكسر الذي يمثل النصف؟", questionWeight: 10, qType: "اختيار من متعدد", options: ["1/3", "1/4", "2/4", "3/4"], correctAnswerIndex: 2, correctAnswer: "2/4" }
+                                ]
+                            }
+                        ]
+                    };
+                } else if (type === 'teachers') {
+                    programData = {
+                        id: id, type: "test", title: "حقيبة التنمية المهنية (التعلم النشط والتمايز)", domain: "المجال الثاني: التعليم والتعلم والتطوير المهني", unitName: "التطوير المهني للمعلمين", introText: "برنامج تدريبي يركز على تفعيل استراتيجيات التدريس الحديثة ومراعاة الفروق الفردية.", duration: 60, colorTheme: "indigo", targetWeight: 100, totalWeight: 100, status: "active",
+                        standardsSections: [
+                            {
+                                standardTitle: "استراتيجيات التعلم النشط", standardWeight: 50,
+                                questions: [
+                                    { text: "من أبرز سمات (التعلم النشط) أن يكون الطالب:", questionWeight: 10, qType: "اختيار من متعدد", options: ["مستمعاً فقط", "محوراً للعملية التعليمية ومشاركاً فاعلاً", "معتمداً كلياً على الكتاب", "حفظة للمعلومات"], correctAnswerIndex: 1, correctAnswer: "محوراً للعملية التعليمية ومشاركاً فاعلاً" }
+                                ]
+                            },
+                            {
+                                standardTitle: "التقويم من أجل التعلم", standardWeight: 50,
+                                questions: [
+                                    { text: "الهدف الأساسي من (التقويم التكويني) هو:", questionWeight: 10, qType: "اختيار من متعدد", options: ["رصد الدرجات النهائية", "تحديد مستوى الطالب لترفيعه", "تقديم تغذية راجعة مستمرة لتحسين التعلم أثناء الحصة", "معاقبة المقصرين"], correctAnswerIndex: 2, correctAnswer: "تقديم تغذية راجعة مستمرة لتحسين التعلم أثناء الحصة" }
+                                ]
+                            }
+                        ]
+                    };
+                } else if (type === 'leadership') {
+                    programData = {
+                        id: id, type: "test", title: "حقيبة القيادة المدرسية ومجتمعات التعلم", domain: "المجال الأول: الإدارة والقيادة المدرسية", unitName: "التخطيط الاستراتيجي", introText: "حقيبة للإدارة تركز على مؤشرات الأداء (KPIs) وإدارة التغيير في البيئة المدرسية.", duration: 40, colorTheme: "purple", targetWeight: 100, totalWeight: 100, status: "active",
+                        standardsSections: [
+                            {
+                                standardTitle: "التخطيط ومؤشرات الأداء", standardWeight: 100,
+                                questions: [
+                                    { text: "الممارسات التأملية في (مجتمعات التعلم المهنية PLCs) تعني:", questionWeight: 20, qType: "اختيار من متعدد", options: ["تبادل الخبرات ومناقشة طرق تدريس لتحسين نواتج التعلم", "كتابة التعاميم", "توزيع الجدول المدرسي", "مراقبة الحضور والغياب"], correctAnswerIndex: 0, correctAnswer: "تبادل الخبرات ومناقشة طرق تدريس لتحسين نواتج التعلم" }
+                                ]
+                            }
+                        ]
+                    };
+                } else if (type === 'behavior') {
+                    programData = {
+                        id: id, type: "test", title: "مقياس المناخ المدرسي والسلوك الإيجابي", domain: "المجال الثالث: البيئة المدرسية والمناخ التنظيمي", unitName: "الإرشاد الطلابي", introText: "استبانة لتقييم شعور الطلاب بالانتماء، الأمن النفسي، وتفعيل الشراكة المجتمعية.", duration: 20, colorTheme: "amber", targetWeight: 100, totalWeight: 100, status: "active",
+                        standardsSections: [
+                            {
+                                standardTitle: "الأمن النفسي والانتماء", standardWeight: 100,
+                                questions: [
+                                    { text: "أشعر بالأمان والراحة عند تواجدي في المدرسة:", questionWeight: 20, qType: "صواب وخطأ", options: ["صواب", "خطأ"], correctAnswerIndex: 0, correctAnswer: "صواب" },
+                                    { text: "يتعامل المعلمون والإدارة باحترام وعدالة مع جميع الطلاب:", questionWeight: 20, qType: "صواب وخطأ", options: ["صواب", "خطأ"], correctAnswerIndex: 0, correctAnswer: "صواب" }
+                                ]
+                            }
+                        ]
+                    };
+                }
+
+                if (programData) {
+                    this.saveToCloud(programData, loaderId);
+                }
+            }
+        }
+
+        const generator = new CloudGenerator();
+    </script>
+</body>
+</html>
