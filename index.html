@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مركز التوليد السحابي الشامل | مدرسة أسيد بن حضير</title>
-    <!-- Tailwind CSS -->
+    <title>بوابة التدريب المدرسي | المجالات التخصصية والمهام التعليمية</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,313 +13,1794 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { cairo: ['Cairo', 'sans-serif'] },
                     colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' }
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        },
+                        success: {
+                            500: '#10b981',
+                            600: '#059669',
+                        }
                     }
                 }
             }
         }
     </script>
-
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+        body { font-family: 'Cairo', sans-serif; background: #f1f5f9; color: #1e293b; }
+        .glass-card { background: rgba(255, 255, 255, 0.96); backdrop-filter: blur(12px); border: 1px solid #e2e8f0; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; }
+        .glass-card:hover { border-color: #6366f1; box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.12); }
+        .accordion-content { transition: max-height 0.35s ease-in-out, opacity 0.3s ease-in-out; overflow: hidden; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        
+        input[type="radio"].mcq-radio, input[type="radio"].tf-correct-radio, input[type="radio"].scale-radio {
+            accent-color: #10b981; 
+            transform: scale(1.3);
         }
-        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); }
-        .glass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; transition: height 0.3s ease; }
-        .card-nafes::before { background: linear-gradient(to right, #10b981, #059669); }
-        .card-teachers::before { background: linear-gradient(to right, #3b82f6, #2563eb); }
-        .card-leadership::before { background: linear-gradient(to right, #8b5cf6, #6d28d9); }
-        .card-behavior::before { background: linear-gradient(to right, #f59e0b, #d97706); }
-        .generating-overlay { display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.95); z-index: 10; align-items: center; justify-content: center; flex-direction: column; }
+        
+        .progress-bar-fill {
+            transition: width 0.4s ease-in-out, background-color 0.4s ease;
+        }
+
+        /* Animation for Educational Task Words */
+        .word-by-word { opacity: 0; animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+        @keyframes popIn { 
+            0% { opacity: 0; transform: scale(0.5) translateY(20px); } 
+            100% { opacity: 1; transform: scale(1) translateY(0); } 
+        }
     </style>
 </head>
-<body class="selection:bg-brand-500 selection:text-white">
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white">
 
-    <!-- Navbar -->
-    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-700 text-white flex items-center justify-center text-xl shadow-lg">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                </div>
-                <div>
-                    <h1 class="text-base sm:text-xl font-black text-slate-900">مركز التوليد السحابي الشامل</h1>
-                    <p class="text-[10px] sm:text-xs text-brand-600 font-bold">إنشاء، تعديل، ونقل الحقائب التدريبية للسحابة</p>
-                </div>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md">
+        <div class="glass-card rounded-3xl max-w-md w-full p-8 space-y-6 shadow-2xl text-center bg-white/95 border border-slate-200">
+            <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white text-2xl mx-auto shadow-lg">
+                📊
             </div>
-            <div class="flex items-center gap-3">
-                <button onclick="app.openManagerModal()" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition flex items-center gap-2">
-                    <i class="fa-solid fa-list-check"></i> إدارة وعرض البرامج المرفوعة
+            <div>
+                <h2 class="text-xl font-black text-slate-900">بوابة التدريب المدرسي</h2>
+                <p class="text-xs text-brand-600 font-bold mt-1">يرجى إدخال اسم المستخدم الخاص بك للدخول للنظام</p>
+            </div>
+            <div class="space-y-4 text-right">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المستخدم</label>
+                    <input type="text" id="depUser" class="w-full px-4 py-3.5 rounded-2xl border border-slate-200 focus:outline-none focus:border-brand-500 text-sm font-semibold bg-slate-50 text-center tracking-wider" placeholder="أدخل اسم المستخدم...">
+                </div>
+                <button onclick="loginDeputy()" class="w-full py-4 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-black text-sm shadow-lg shadow-brand-500/30 transition flex items-center justify-center gap-2">
+                    <span>تسجيل الدخول للنظام</span> <i class="fa-solid fa-arrow-left"></i>
                 </button>
-                <div class="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-2 rounded-xl">
-                    <span id="db-status" class="text-xs font-black text-slate-700"><i class="fa-solid fa-circle-notch fa-spin text-amber-500 ml-1"></i> جاري الاتصال...</span>
+            </div>
+            <div id="loginNotify" class="text-xs font-bold text-rose-500 hidden"></div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="appContainer" class="min-h-screen flex flex-col" style="display: none;">
+        <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 sm:px-8 py-3 shadow-xs">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="app.switchTab('dashboard')">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white text-xl shadow-md">
+                        📊
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-black text-slate-900">بوابة التدريب المدرسي</h1>
+                        <p id="welcomeSchoolDisplay" class="text-xs text-brand-600 font-bold">المجالات التخصصية والمهام التعليمية التفاعلية</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap justify-center">
+                    <button onclick="app.switchTab('dashboard')" id="tab-btn-dashboard" class="px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white transition shadow-sm">
+                        <i class="fa-solid fa-house ml-1"></i> المجالات الرئيسية
+                    </button>
+                    <button onclick="app.openCreatorForNew()" id="tab-btn-creator" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                        <i class="fa-solid fa-plus-circle ml-1"></i> إنشاء مهمة / تقييم
+                    </button>
+                    <button onclick="app.switchTab('indicators')" id="tab-btn-indicators" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition">
+                        <i class="fa-solid fa-chart-line ml-1"></i> المؤشرات الشاملة
+                    </button>
+                    <button onclick="logoutDeputy()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 transition" title="تسجيل الخروج">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
                 </div>
             </div>
+        </header>
+
+        <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-6">
+
+            <!-- VIEW 1: DASHBOARD -->
+            <div id="view-dashboard" class="space-y-6">
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-800 text-white rounded-3xl p-6 md:p-8 shadow-lg relative overflow-hidden">
+                    <div class="max-w-2xl space-y-3">
+                        <span class="px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-200 text-xs font-bold border border-indigo-400/30">
+                            🎯 منصة التدريب - إدارة المجالات والمعايير والأوزان
+                        </span>
+                        <h2 class="text-2xl md:text-3xl font-black">مرحباً بك في نظام التدريب المدرسي</h2>
+                        <p class="text-indigo-100 text-sm leading-relaxed">
+                            استعرض المجالات، أعد تسميتها، أو أضف مجالات جديدة بحرية، وتابع المهام التفاعلية ومعايير الأداء مع خيارات النشر والمشاركة المتقدمة.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold text-base">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-black text-slate-900">إدارة المجالات الرئيسية</h3>
+                            <p class="text-[11px] text-slate-500">إضافة مجالات جديدة أو إنشاء مهام تدريبية داخلها مباشرة.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                        <button onclick="app.openAddDomainModal()" class="px-3.5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+                            <i class="fa-solid fa-plus text-[10px]"></i> إضافة مجال جديد
+                        </button>
+                        <button onclick="app.expandAllDomains()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">فتح الكل</button>
+                        <button onclick="app.collapseAllDomains()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">إغلاق الكل</button>
+                    </div>
+                </div>
+
+                <div id="collapsible-domains-container" class="space-y-4"></div>
+            </div>
+
+            <!-- VIEW 2: ADVANCED CREATOR -->
+            <div id="view-creator" class="space-y-6 hidden">
+                <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-4xl mx-auto space-y-6 shadow-xl bg-white relative">
+                    
+                    <!-- Total Weight Sticky Badge -->
+                    <div id="total-weight-badge" class="absolute -top-4 left-6 bg-rose-500 text-white px-4 py-2 rounded-xl shadow-lg border border-rose-400 flex flex-col items-center gap-0.5 font-black z-10 transition-colors duration-300">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i class="fa-solid fa-scale-balanced"></i> إجمالي النقاط / الوزن: <span id="total-weight-display">0</span>
+                        </div>
+                        <div class="text-[10px] opacity-90" id="weight-status-text">الوزن المستهدف: 100 (غير متطابق)</div>
+                    </div>
+
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div>
+                            <h3 id="creator-main-title" class="text-xl font-black text-slate-900">بناء وتصميم مهمة تعليمية أو مقياس أداء</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">حدد النوع، أضف المحتوى أو الأسئلة مع تحديد الإجابة الصحيحة بالضغط المباشر.</p>
+                        </div>
+                        <button onclick="app.switchTab('dashboard')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
+
+                    <form id="creation-form" onsubmit="app.handleFormSubmit(event)" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-700">حدد نوع العنصر المراد إنشاؤه:</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button type="button" onclick="app.setCreatorType('test')" id="creator-type-test-btn" class="p-4 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1.5 border-brand-600 bg-brand-50 text-brand-700 font-black text-xs shadow-xs">
+                                    <i class="fa-solid fa-file-lines text-lg"></i>
+                                    <span>برنامج تدريبي ومقاييس (أسئلة ودرجات)</span>
+                                </button>
+                                <button type="button" onclick="app.setCreatorType('edu_task')" id="creator-type-q-btn" class="p-4 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1.5 border-slate-200 bg-white text-slate-700 font-bold text-xs hover:border-slate-300">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                                    <span>مهمة تعليمية (شرح تفاعلي وبطاقات)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Collapsible Intro & Settings with Energy Bar -->
+                        <div class="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-sm">
+                            <div class="p-4 bg-slate-50 border-b border-slate-200 cursor-pointer flex justify-between items-center hover:bg-slate-100 transition" onclick="app.toggleIntroSection()">
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900 flex items-center gap-2">
+                                        <i class="fa-solid fa-sliders text-brand-600"></i> البيانات والمقدمة الرئيسية
+                                    </h4>
+                                    <div class="w-48 h-2 bg-slate-200 rounded-full mt-2 overflow-hidden">
+                                        <div id="intro-energy-bar" class="h-full bg-rose-500 progress-bar-fill w-0"></div>
+                                    </div>
+                                    <span id="intro-energy-text" class="text-[10px] text-slate-500 font-bold">اكتمال البيانات: 0%</span>
+                                </div>
+                                <i id="intro-toggle-icon" class="fa-solid fa-chevron-up text-slate-500"></i>
+                            </div>
+                            
+                            <div id="intro-settings-content" class="p-5 space-y-4 transition-all duration-300">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">عنوان المهمة / البرنامج الرئيسي *</label>
+                                        <input type="text" id="input-title" required oninput="app.updateEnergyBar()" placeholder="مثال: برنامج الكفايات التخصصية" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 text-sm font-semibold bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">المجال الرئيسي المستهدف *</label>
+                                        <select id="input-domain" onchange="app.updateEnergyBar()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 text-sm font-semibold bg-white"></select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم الوحدة أو المحور *</label>
+                                        <input type="text" id="input-unit" required oninput="app.updateEnergyBar()" placeholder="مثال: وحدة الإحصاء والتحليل" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:border-brand-500 text-sm font-semibold bg-white">
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-700 mb-1">الوزن / النقاط المستهدفة</label>
+                                        <input type="number" id="input-target-weight" value="100" min="1" oninput="app.updateTotalWeight()" class="w-full px-3.5 py-2 rounded-xl border-2 border-brand-200 text-xs font-black bg-white focus:border-brand-500 outline-none text-brand-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-700 mb-1">وقت التنفيذ (بالدقائق)</label>
+                                        <input type="number" id="input-duration" value="30" min="1" max="180" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-700 mb-1">لون سمة العرض</label>
+                                        <select id="input-color" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
+                                            <option value="indigo">أزرق نيلي</option>
+                                            <option value="amber">أصفر مميز</option>
+                                            <option value="emerald">أخضر زمردي</option>
+                                            <option value="rose">أحمر وردي</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-700 mb-1">رفع وسائط (صورة/فيديو Base64)</label>
+                                        <input type="file" id="input-media-file" accept="image/*,video/*" onchange="app.handleMediaUpload(this)" class="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-[10px] bg-white cursor-pointer focus:outline-none focus:border-brand-500">
+                                        <input type="hidden" id="input-media-base64">
+                                    </div>
+                                    
+                                    <!-- مساحة عرض الصورة/الفيديو المصغرة -->
+                                    <div class="sm:col-span-4 hidden" id="media-preview-container">
+                                        <label class="block text-[10px] font-bold text-slate-700 mb-1">معاينة الوسائط المرفقة:</label>
+                                        <div id="media-preview" class="border border-slate-200 bg-white p-2 rounded-xl flex justify-center items-center max-h-40 overflow-hidden"></div>
+                                    </div>
+
+                                    <div class="sm:col-span-4">
+                                        <label class="block text-[10px] font-bold text-slate-700 mb-1">مقدمة أو تعليمات قبل البدء</label>
+                                        <textarea id="input-intro" rows="2" oninput="app.updateEnergyBar()" placeholder="أهلاً بك في هذا التدريب..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:outline-none focus:border-brand-500"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6 pt-4 border-t border-slate-200">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900">أقسام المحتوى (تفتح وتنزل)</h4>
+                                    <p class="text-[11px] text-slate-500">أضف الأقسام/اللوحات. انقر على الشريط لطيّه أو فتحه.</p>
+                                </div>
+                                <button type="button" onclick="app.addStandardSectionRow()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+                                    <i class="fa-solid fa-plus-circle"></i> <span>إضافة قسم جديد</span>
+                                </button>
+                            </div>
+                            <div id="standards-builder-container" class="space-y-4"></div>
+                        </div>
+
+                        <div class="pt-4 flex gap-3 border-t border-slate-100">
+                            <button type="submit" id="submit-form-btn" class="flex-1 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-lg shadow-brand-500/20 transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-check"></i> حفظ العنصر
+                            </button>
+                            <button type="button" onclick="app.switchTab('dashboard')" class="px-6 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition">إلغاء</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- VIEW 3: INDICATORS -->
+            <div id="view-indicators" class="space-y-6 hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-black text-slate-900">مؤشرات وتقارير أداء المتدربين الشاملة</h3>
+                        <p class="text-xs text-slate-500">استعراض تفصيلي لمستويات المتدربين، نسب الإنجاز، ودرجات المعايير لكل برنامج أو مهمة.</p>
+                    </div>
+                    <button onclick="app.switchTab('dashboard')" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition">العودة للرئيسية</button>
+                </div>
+                <div id="comprehensive-indicators-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- EDU PREVIEW MODAL -->
+    <div id="edu-preview-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md hidden">
+        <div class="glass-card rounded-3xl max-w-2xl w-full p-8 shadow-2xl text-center bg-white border-b-4 border-brand-500 relative">
+            <button onclick="document.getElementById('edu-preview-modal').classList.add('hidden')" class="absolute top-4 left-4 w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-black text-brand-600 mb-6 flex items-center justify-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> معاينة المهمة التعليمية (شرح تفاعلي)</h3>
+            <div id="edu-preview-content" class="text-xl md:text-2xl leading-relaxed font-black text-slate-800 p-8 bg-slate-50 rounded-2xl min-h-[200px] flex flex-wrap justify-center content-center gap-y-3 border border-slate-100 shadow-inner"></div>
         </div>
-    </header>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        
-        <div class="text-center max-w-3xl mx-auto">
-            <h2 class="text-3xl font-black text-slate-900 mb-4">أهم البرامج لرفع تقييم المدرسة</h2>
-            <p class="text-slate-500 font-semibold leading-relaxed">
-                ولّد الحقائب بضغطة زر، أو افتح لوحة الإدارة أدناه لتعديل مسميات البرامج أو نقلها بين المجالات المختلفة بكل سهولة.
-            </p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <!-- 1. نافس -->
-            <div class="glass-card card-nafes p-6">
-                <div class="generating-overlay" id="loader-nafes"><i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-emerald-500 mb-3"></i><p class="text-sm font-bold text-slate-700">جاري الرفع...</p></div>
-                <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-4 border border-emerald-100"><i class="fa-solid fa-ranking-star"></i></div>
-                <h3 class="text-lg font-black text-slate-900 mb-2">التهيئة لاختبارات نافس</h3>
-                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">حقيبة متكاملة لرفع التحصيل في لغتي والرياضيات.</p>
-                <button onclick="app.generateProgram('nafes')" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm transition-all shadow-md">توليد ورفع البرنامج</button>
-            </div>
-
-            <!-- 2. التنمية المهنية -->
-            <div class="glass-card card-teachers p-6">
-                <div class="generating-overlay" id="loader-teachers"><i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-blue-500 mb-3"></i><p class="text-sm font-bold text-slate-700">جاري الرفع...</p></div>
-                <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl mb-4 border border-blue-100"><i class="fa-solid fa-chalkboard-user"></i></div>
-                <h3 class="text-lg font-black text-slate-900 mb-2">التنمية المهنية للمعلمين</h3>
-                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">برنامج تدريبي في التعلم النشط والتقويم التكويني.</p>
-                <button onclick="app.generateProgram('teachers')" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm transition-all shadow-md">توليد ورفع البرنامج</button>
-            </div>
-
-            <!-- 3. مجتمعات التعلم -->
-            <div class="glass-card card-leadership p-6">
-                <div class="generating-overlay" id="loader-leadership"><i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-purple-500 mb-3"></i><p class="text-sm font-bold text-slate-700">جاري الرفع...</p></div>
-                <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mb-4 border border-purple-100"><i class="fa-solid fa-sitemap"></i></div>
-                <h3 class="text-lg font-black text-slate-900 mb-2">مجتمعات التعلم (PLCs)</h3>
-                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">حقيبة للإدارة المدرسية ومؤشرات الأداء.</p>
-                <button onclick="app.generateProgram('leadership')" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm transition-all shadow-md">توليد ورفع البرنامج</button>
-            </div>
-
-            <!-- 4. السلوك -->
-            <div class="glass-card card-behavior p-6">
-                <div class="generating-overlay" id="loader-behavior"><i class="fa-solid fa-cloud-arrow-up fa-bounce text-4xl text-amber-500 mb-3"></i><p class="text-sm font-bold text-slate-700">جاري الرفع...</p></div>
-                <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl mb-4 border border-amber-100"><i class="fa-solid fa-users-rays"></i></div>
-                <h3 class="text-lg font-black text-slate-900 mb-2">السلوك والمناخ المدرسي</h3>
-                <p class="text-xs text-slate-500 font-bold mb-6 flex-grow">مقياس لتعزيز الانتماء ونبذ التنمر.</p>
-                <button onclick="app.generateProgram('behavior')" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm transition-all shadow-md">توليد ورفع البرنامج</button>
-            </div>
-
-        </div>
-    </main>
-
-    <!-- MANAGER & EDITOR MODAL -->
-    <div id="manager-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-5 shadow-2xl bg-white max-h-[90vh] flex flex-col">
+    <!-- SHARE & PUBLISH MODAL -->
+    <div id="share-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 shadow-2xl bg-white max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
-                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-pen-to-square text-brand-600"></i> إدارة وتعديل ونقل البرامج المرفوعة
-                </h3>
-                <button onclick="document.getElementById('manager-modal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark"></i></button>
+                <h4 class="text-lg font-black text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-brand-600"></i> إدارة المستفيدين ونشر البرنامج
+                </h4>
+                <button onclick="app.closeShareModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
             
-            <div id="programs-list-container" class="overflow-y-auto flex-1 space-y-3 pr-1 custom-scrollbar">
-                <!-- Programs injected here -->
+            <div class="space-y-4 overflow-y-auto flex-1 pr-1 custom-scrollbar">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center gap-2 p-3 rounded-2xl border border-slate-200 hover:border-brand-500 cursor-pointer bg-slate-50 transition">
+                        <input type="radio" name="publishTarget" id="radio_teachers" value="teachers_db" checked class="text-brand-600 w-4 h-4" onchange="app.togglePublishOptions()">
+                        <span class="text-xs font-black text-slate-900">فئة المعلمين</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-3 rounded-2xl border border-slate-200 hover:border-brand-500 cursor-pointer bg-slate-50 transition">
+                        <input type="radio" name="publishTarget" id="radio_students" value="students_db" class="text-brand-600 w-4 h-4" onchange="app.togglePublishOptions()">
+                        <span class="text-xs font-black text-slate-900">فئة المتدربين/الطلاب</span>
+                    </label>
+                </div>
+
+                <!-- Dynamic Data List Area -->
+                <div class="border border-slate-200 rounded-2xl bg-white overflow-hidden shadow-sm flex flex-col">
+                    
+                    <!-- Filter for Students Only -->
+                    <div id="studentsClassesBox" class="hidden p-3 bg-slate-50 border-b border-slate-200">
+                        <label class="block text-[10px] font-bold text-slate-700 mb-1">اختر الفصل/المجموعة للفلترة:</label>
+                        <select id="targetClassSelect" onchange="app.updateTargetClassSelectChange()" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:border-brand-500 outline-none">
+                            <option value="الكل">جميع الفصول</option>
+                            <!-- خيارات الفصول تُجلب من الداتابيس -->
+                        </select>
+                    </div>
+
+                    <!-- Filter by Completion Status -->
+                    <div id="statusFilterBox" class="p-3 bg-indigo-50 border-b border-indigo-100">
+                        <label class="block text-[10px] font-bold text-indigo-800 mb-1"><i class="fa-solid fa-filter"></i> فلتر حسب حالة الإنجاز (لإرسال تذكير مخصص):</label>
+                        <select id="targetStatusSelect" onchange="app.renderPublishTargets()" class="w-full px-3 py-2 rounded-xl border border-indigo-200 text-xs font-bold bg-white focus:border-indigo-500 outline-none text-indigo-700">
+                            <option value="all">عرض الجميع</option>
+                            <option value="pending">لم يطلع / لم يحل (تحديد لإرسال تذكير)</option>
+                            <option value="completed">أتم الحل (تحديد لإرسال شكر)</option>
+                        </select>
+                    </div>
+
+                    <div class="p-3 bg-slate-100/50 border-b border-slate-200 flex justify-between items-center">
+                        <span class="text-[11px] font-black text-slate-700">قائمة المستفيدين:</span>
+                        <button type="button" onclick="app.toggleSelectAllTargets()" id="selectAllBtn" class="text-[10px] bg-white border border-slate-300 hover:bg-slate-50 px-2.5 py-1 rounded-lg font-bold text-slate-600 transition shadow-2xs">تحديد الكل</button>
+                    </div>
+                    
+                    <div id="targetListContainer" class="max-h-40 overflow-y-auto p-2 space-y-1">
+                        <!-- Checkboxes will be injected here -->
+                    </div>
+                </div>
+
+                <!-- WhatsApp Integration Checkbox -->
+                <label class="flex items-center gap-3 p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50 cursor-pointer transition hover:bg-emerald-100">
+                    <input type="checkbox" id="sendWhatsappCheck" class="w-4 h-4 text-emerald-600 accent-emerald-600 rounded">
+                    <div>
+                        <span class="text-xs font-black text-emerald-800 flex items-center gap-1.5"><i class="fa-brands fa-whatsapp text-lg"></i> إرسال رسائل التنبيه عبر واتساب</span>
+                        <p class="text-[9px] text-emerald-600 mt-0.5">تتغير رسالة الإرسال تلقائياً حسب حالة المستفيد.</p>
+                    </div>
+                </label>
+
+            </div>
+            
+            <div class="pt-2 flex gap-3 border-t border-slate-100 shrink-0 mt-2">
+                <button onclick="app.confirmPublish()" class="flex-1 py-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-paper-plane"></i> اعتماد الصلاحيات ونشر
+                </button>
+                <button onclick="app.closeShareModal()" class="px-5 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <!-- EDIT PROGRAM MODAL -->
-    <div id="edit-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-        <div class="glass-card rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl bg-white">
-            <h3 class="text-base font-black text-slate-900 border-b pb-3">تعديل ونقل البرنامج</h3>
-            <input type="hidden" id="edit-program-id">
-            
-            <div class="space-y-3 text-right">
+    <!-- WHATSAPP DISPATCHER MODAL -->
+    <div id="whatsapp-modal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-md w-full p-6 shadow-2xl bg-white max-h-[85vh] flex flex-col border-t-4 border-emerald-500">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4 shrink-0">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">تعديل المسمى (العنوان):</label>
-                    <input type="text" id="edit-program-title" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:border-brand-500 outline-none">
+                    <h3 class="font-black text-emerald-600 text-lg flex items-center gap-2"><i class="fa-brands fa-whatsapp text-xl"></i> مُرسل الواتساب الذكي</h3>
+                    <p class="text-[10px] text-slate-500 font-bold mt-1">تختلف صيغة الرسالة المرسلة بناءً على حالة كل شخص.</p>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">اسم الوحدة أو المحور:</label>
-                    <input type="text" id="edit-program-unit" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold focus:border-brand-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">نقل إلى مجال رئيسي:</label>
-                    <select id="edit-program-domain" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:border-brand-500 outline-none">
-                        <option value="المجال الأول: الإدارة والقيادة المدرسية">المجال الأول: الإدارة والقيادة المدرسية</option>
-                        <option value="المجال الثاني: التعليم والتعلم والتطوير المهني">المجال الثاني: التعليم والتعلم والتطوير المهني</option>
-                        <option value="المجال الثالث: البيئة المدرسية والمناخ التنظيمي">المجال الثالث: البيئة المدرسية والمناخ التنظيمي</option>
-                        <option value="المجال الرابع: نواتج التعلم والتحصيل الدراسي">المجال الرابع: نواتج التعلم والتحصيل الدراسي</option>
-                    </select>
-                </div>
+                <button onclick="document.getElementById('whatsapp-modal').classList.add('hidden'); app.switchTab('dashboard');" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition"><i class="fa-solid fa-xmark text-sm"></i></button>
             </div>
-
-            <div class="flex gap-2 pt-3 border-t">
-                <button onclick="app.saveEditedProgram()" class="flex-1 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition">حفظ التغييرات ونقل</button>
-                <button onclick="document.getElementById('edit-modal').classList.add('hidden')" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">إلغاء</button>
+            
+            <div id="wa-list" class="overflow-y-auto flex-1 space-y-2 pr-1 custom-scrollbar">
+                <!-- WhatsApp targets injected here -->
+            </div>
+            
+            <div class="pt-4 mt-4 border-t border-slate-100 shrink-0">
+                <button onclick="document.getElementById('whatsapp-modal').classList.add('hidden'); app.switchTab('dashboard');" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs transition">إنهاء وإغلاق</button>
             </div>
         </div>
     </div>
 
-    <footer class="bg-slate-900 text-slate-400 py-6 mt-12 text-center">
-        <p class="text-xs font-bold text-slate-300">برمجة وتطوير: <span class="text-white font-black">أ. عاصم المشيقح</span></p>
-    </footer>
+    <!-- ADD DOMAIN MODAL -->
+    <div id="add-domain-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl bg-white text-center">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 text-xl flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-folder-plus"></i>
+            </div>
+            <h4 class="text-base font-black text-slate-900">إضافة مجال رئيسي جديد</h4>
+            <input type="text" id="newDomainNameInput" placeholder="اسم المجال الجديد..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-slate-50 focus:outline-none focus:border-brand-500 text-center">
+            <div class="flex gap-2 pt-2">
+                <button onclick="app.saveNewDomain()" class="flex-1 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition">إضافة وحفظ</button>
+                <button onclick="app.closeAddDomainModal()" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">إلغاء</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- LOGIC SCRIPT -->
+    <!-- MESSAGE MODAL -->
+    <div id="message-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+        <div class="glass-card rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl bg-white text-center">
+            <div class="w-12 h-12 rounded-2xl bg-brand-50 text-brand-600 text-xl flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-circle-info"></i>
+            </div>
+            <h4 id="message-modal-title" class="text-base font-black text-slate-900">تنبيه النظام</h4>
+            <p id="message-modal-text" class="text-xs text-slate-600 leading-relaxed"></p>
+            <button onclick="document.getElementById('message-modal').classList.add('hidden')" class="w-full py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs transition">حسناً</button>
+        </div>
+    </div>
+
+    <!-- SCRIPT LOGIC -->
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCIW17B6y6sG_bdUFqF7FWoVIY9ynXv1B4", authDomain: "myschoolproject-4ad92.firebaseapp.com", databaseURL: "https://myschoolproject-4ad92-default-rtdb.firebaseio.com", projectId: "myschoolproject-4ad92" };
         if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const database = firebase.database();
-        const dbRef = database.ref('external_eval_training_v1');
 
-        class CloudGenerator {
+        let app = null;
+
+        function loginDeputy() {
+            const user = document.getElementById('depUser').value.trim();
+            const notifyEl = document.getElementById('loginNotify');
+            if(!user) { notifyEl.textContent = "الرجاء إدخال اسم المستخدم"; notifyEl.classList.remove('hidden'); return; }
+
+            Promise.all([
+                database.ref('school_admins').once('value'),
+                database.ref('deputies').once('value'),
+                database.ref('assignments').once('value'),
+                database.ref('students').once('value')
+            ]).then(snapshots => {
+                let loggedIn = false;
+                let displayName = "";
+                let schoolId = "";
+
+                const admins = snapshots[0].val() || {};
+                for(let k in admins) { 
+                    if(admins[k].user === user) { 
+                        loggedIn = true; 
+                        schoolId = admins[k].schoolId || ""; 
+                        displayName = admins[k].schoolName || "إدارة المدرسة"; 
+                        break; 
+                    } 
+                }
+                
+                if(!loggedIn) {
+                    const deputies = snapshots[1].val() || {};
+                    for(let k in deputies) { 
+                        if(deputies[k].user === user) { 
+                            loggedIn = true; 
+                            schoolId = deputies[k].schoolId || ""; 
+                            displayName = deputies[k].name || "وكيل المدرسة"; 
+                            break; 
+                        } 
+                    }
+                }
+
+                if(!loggedIn) {
+                    const teachers = snapshots[2].val() || {};
+                    for(let k in teachers) { 
+                        if(teachers[k].teacherUser === user) { 
+                            loggedIn = true; 
+                            schoolId = teachers[k].schoolId || ""; 
+                            displayName = teachers[k].teacherName || "المعلم"; 
+                            break; 
+                        } 
+                    }
+                }
+
+                if(!loggedIn) {
+                    const students = snapshots[3].val() || {};
+                    for(let k in students) { 
+                        if(students[k].studentUser === user) { 
+                            loggedIn = true; 
+                            schoolId = students[k].schoolId || ""; 
+                            displayName = students[k].studentName || "الطالب"; 
+                            break; 
+                        } 
+                    }
+                }
+
+                if(user === "عاصم") { 
+                    loggedIn = true; 
+                    displayName = "أ. عاصم المشيقح"; 
+                    schoolId = "ADMIN_ALL"; 
+                }
+
+                if(loggedIn) {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'flex';
+                    if(displayName) document.getElementById('welcomeSchoolDisplay').textContent = `مرحباً بك: ${displayName}`;
+                    localStorage.setItem('deputyUserSession', user);
+                    localStorage.setItem('deputyDisplayName', displayName);
+                    localStorage.setItem('deputySchoolId', schoolId); 
+                    if(!app) app = new SchoolMeasurementApp();
+                } else {
+                    notifyEl.textContent = "اسم المستخدم غير مسجل بقاعدة البيانات الفعلية!";
+                    notifyEl.classList.remove('hidden');
+                }
+            }).catch(error => {
+                notifyEl.textContent = "حدث خطأ في الاتصال بقاعدة البيانات.";
+                notifyEl.classList.remove('hidden');
+                console.error(error);
+            });
+        }
+
+        function logoutDeputy() { 
+            localStorage.removeItem('deputyUserSession'); 
+            localStorage.removeItem('deputyDisplayName');
+            localStorage.removeItem('deputySchoolId');
+            location.reload(); 
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('deputyUserSession');
+            if(savedUser) { 
+                document.getElementById('depUser').value = savedUser; 
+                loginDeputy(); 
+            }
+        });
+
+        class SchoolMeasurementApp {
             constructor() {
-                this.programs = [];
-                this.fetchData();
+                this.creatorType = 'test';
+                this.editingItemId = null;
+                this.pendingPublishData = null;
+                this.introSectionOpen = true;
+                this.currentPermissions = null; 
+                this.selectAllState = false;
+                this.currentSharingTestId = null;
+                
+                this.dbTeachers = [];
+                this.dbStudents = [];
+                this.classesList = [];
+
+                this.initializeFirebaseListeners();
+
+                // تم تغيير المفاتيح لتكون مستقلة عن بوابة القياس
+                const savedDomains = localStorage.getItem('gifted_training_domains_v1');
+                this.domains = savedDomains ? JSON.parse(savedDomains) : [
+                    "المجال الأول: التدريب التربوي العام والأساسيات",
+                    "المجال الثاني: الكفايات التخصصية للمعلمين",
+                    "المجال الثالث: البرامج التدريبية وتطوير الأداء المهني",
+                    "المجال الرابع: المهام التعليمية والتفاعلية"
+                ];
+
+                this.domainStates = {};
+                this.domains.forEach(d => this.domainStates[d] = true);
+                this.loadData();
+                this.updateEnergyBar();
             }
 
-            fetchData() {
-                dbRef.on('value', snap => {
-                    const data = snap.val();
-                    if(data) {
-                        this.programs = Array.isArray(data) ? data : Object.values(data);
-                    } else {
-                        this.programs = [];
+            initializeFirebaseListeners() {
+                const currentSchoolId = localStorage.getItem('deputySchoolId') || "";
+
+                database.ref('classes').on('value', snap => {
+                    const data = snap.val() || {};
+                    if (currentSchoolId === "ADMIN_ALL") {
+                        let allCls = [];
+                        for(let sId in data) {
+                            for(let pushId in data[sId]) {
+                                allCls.push(data[sId][pushId].className);
+                            }
+                        }
+                        this.classesList = Array.from(new Set(allCls.filter(c => c)));
+                    } else if (currentSchoolId !== "") {
+                        const schoolClasses = data[currentSchoolId] || {};
+                        this.classesList = Object.keys(schoolClasses).map(k => schoolClasses[k].className).filter(c => c);
                     }
-                    document.getElementById('db-status').innerHTML = '<i class="fa-solid fa-cloud-check text-emerald-600 ml-1"></i> متصل وجاهز للرفع';
+                    this.updateTargetClassSelectDropdown();
+                    this.fetchAndFilterStudents(); 
+                });
+
+                database.ref('assignments').on('value', snap => {
+                    const data = snap.val() || {};
+                    this.dbTeachers = Object.keys(data)
+                        .filter(k => {
+                            if(currentSchoolId === "ADMIN_ALL") return true; 
+                            return data[k].schoolId === currentSchoolId;
+                        })
+                        .map(k => ({
+                            id: k,
+                            name: data[k].teacherName,
+                            phone: data[k].teacherPhone || '',
+                            subject: data[k].subject || ''
+                        }));
+                    if(document.getElementById('share-modal') && !document.getElementById('share-modal').classList.contains('hidden')) {
+                        this.renderPublishTargets();
+                    }
                 });
             }
 
-            saveToCloud(program, loaderId) {
-                document.getElementById(loaderId).style.display = 'flex';
-                setTimeout(() => {
-                    this.programs.unshift(program);
-                    dbRef.set(this.programs)
-                        .then(() => {
-                            document.getElementById(loaderId).style.display = 'none';
-                            alert(`✅ تم توليد "${program.title}" ورفعه للسحابة وظهوره مباشرة!`);
+            fetchAndFilterStudents() {
+                const currentSchoolId = localStorage.getItem('deputySchoolId') || "";
+                database.ref('students').on('value', snap => {
+                    const data = snap.val() || {};
+                    this.dbStudents = Object.keys(data)
+                        .filter(k => {
+                            if(currentSchoolId === "ADMIN_ALL") return true; 
+                            let st = data[k];
+                            return st.schoolId === currentSchoolId;
                         })
-                        .catch(err => {
-                            console.error(err);
-                            document.getElementById(loaderId).style.display = 'none';
-                            alert("❌ حدث خطأ أثناء الرفع.");
-                        });
-                }, 1000);
+                        .map(k => ({
+                            id: k,
+                            name: data[k].studentName,
+                            phone: data[k].studentPhone || '',
+                            class: data[k].className || ''
+                        }));
+                    
+                    if(document.getElementById('share-modal') && !document.getElementById('share-modal').classList.contains('hidden')) {
+                        this.renderPublishTargets();
+                    }
+                });
             }
 
-            generateProgram(type) {
-                const id = Date.now();
-                let programData = null;
-                let loaderId = `loader-${type}`;
+            updateTargetClassSelectDropdown() {
+                const select = document.getElementById('targetClassSelect');
+                if(!select) return;
+                const currentVal = select.value;
+                select.innerHTML = '<option value="الكل">جميع الفصول</option>';
+                this.classesList.forEach(c => {
+                    select.innerHTML += `<option value="${c}">${c}</option>`;
+                });
+                if(this.classesList.includes(currentVal)) {
+                    select.value = currentVal;
+                }
+            }
 
-                if (type === 'nafes') {
-                    programData = {
-                        id: id, type: "test", title: "برنامج التهيئة لاختبارات نافس الوطنية", domain: "المجال الرابع: نواتج التعلم والتحصيل الدراسي", unitName: "الاستعداد الوطني", introText: "برنامج لرفع مهارات الطلاب في الرياضيات والقراءة.", duration: 45, totalWeight: 100, status: "active",
-                        standardsSections: [{ standardTitle: "مهارات الاستيعاب", standardWeight: 100, questions: [{ text: "الفكرة الرئيسة لنص الشمس:", questionWeight: 20, qType: "اختيار من متعدد", options: ["فوائد الشمس", "حجم الشمس", "بعدها", "لا شيء"], correctAnswerIndex: 0, correctAnswer: "فوائد الشمس" }] }]
-                    };
-                } else if (type === 'teachers') {
-                    programData = {
-                        id: id, type: "test", title: "حقيبة التنمية المهنية (التعلم النشط)", domain: "المجال الثاني: التعليم والتعلم والتطوير المهني", unitName: "التطوير المهني", introText: "استراتيجيات التدريس والتعلم النشط.", duration: 60, totalWeight: 100, status: "active",
-                        standardsSections: [{ standardTitle: "التعلم النشط", standardWeight: 100, questions: [{ text: "محور العملية التعليمية في التعلم النشط:", questionWeight: 20, qType: "اختيار من متعدد", options: ["المعلم", "الطالب", "المنهج", "الإدارة"], correctAnswerIndex: 1, correctAnswer: "الطالب" }] }]
-                    };
-                } else if (type === 'leadership') {
-                    programData = {
-                        id: id, type: "test", title: "مجتمعات التعلم المهنية (PLCs)", domain: "المجال الأول: الإدارة والقيادة المدرسية", unitName: "التخطيط الاستراتيجي", introText: "حقيبة للإدارة ومؤشرات الأداء.", duration: 40, totalWeight: 100, status: "active",
-                        standardsSections: [{ standardTitle: "القيادة", standardWeight: 100, questions: [{ text: "الهدف من مجتمعات التعلم:", questionWeight: 20, qType: "اختيار من متعدد", options: ["تحسين نواتج التعلم", "حضور الاجتماعات", "أرشفة السجلات", "تنظيم الفسحة"], correctAnswerIndex: 0, correctAnswer: "تحسين نواتج التعلم" }] }]
-                    };
-                } else if (type === 'behavior') {
-                    programData = {
-                        id: id, type: "test", title: "مقياس المناخ المدرسي والسلوك", domain: "المجال الثالث: البيئة المدرسية والمناخ التنظيمي", unitName: "الإرشاد الطلابي", introText: "تعزيز السلوك الإيجابي ونبذ التنمر.", duration: 20, totalWeight: 100, status: "active",
-                        standardsSections: [{ standardTitle: "الانتماء", standardWeight: 100, questions: [{ text: "أشعر بالأمان في مدرستي:", questionWeight: 20, qType: "صواب وخطأ", options: ["صواب", "خطأ"], correctAnswerIndex: 0, correctAnswer: "صواب" }] }]
-                    };
+            formatPhoneForWhatsApp(phone) {
+                if(!phone) return '';
+                let p = phone.toString().replace(/[٠-٩]/g, function (d) { return String.fromCharCode(d.charCodeAt(0) - 1632); }).trim().replace(/\s+/g, '');
+                if(p.startsWith('05')) { p = '966' + p.substring(1); }
+                else if (p.startsWith('5')) { p = '966' + p; }
+                return p;
+            }
+
+            saveDomains() {
+                localStorage.setItem('gifted_training_domains_v1', JSON.stringify(this.domains));
+                this.renderDashboard();
+                this.updateDomainDropdowns();
+            }
+
+            openAddDomainModal() {
+                document.getElementById('newDomainNameInput').value = '';
+                document.getElementById('add-domain-modal').classList.remove('hidden');
+            }
+            closeAddDomainModal() {
+                document.getElementById('add-domain-modal').classList.add('hidden');
+            }
+            saveNewDomain() {
+                const name = document.getElementById('newDomainNameInput').value.trim();
+                if(!name) { alert("أدخل اسم المجال الجديد"); return; }
+                if(this.domains.includes(name)) { alert("هذا المجال موجود مسبقاً"); return; }
+                this.domains.push(name);
+                this.domainStates[name] = true;
+                this.saveDomains();
+                this.closeAddDomainModal();
+            }
+
+            renameDomain(oldName) {
+                let newName = prompt("أدخل الاسم الجديد للمجال:", oldName);
+                if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+                    newName = newName.trim();
+                    if(this.domains.includes(newName)) {
+                        alert("هذا الاسم موجود مسبقاً!");
+                        return;
+                    }
+                    let idx = this.domains.indexOf(oldName);
+                    if (idx !== -1) {
+                        this.domains[idx] = newName;
+                        this.domainStates[newName] = this.domainStates[oldName];
+                        delete this.domainStates[oldName];
+                        
+                        this.tests.forEach(t => {
+                            if(t.domain === oldName) t.domain = newName;
+                        });
+                        this.saveDomains();
+                        this.saveData();
+                        this.showAlert("تم التعديل", `تم إعادة تسمية المجال إلى "${newName}" بنجاح.`);
+                    }
+                }
+            }
+
+            deleteDomain(domainName) {
+                if(confirm(`⚠️ هل أنت متأكد من حذف المجال بالكامل: (${domainName})؟`)) {
+                    this.domains = this.domains.filter(d => d !== domainName);
+                    delete this.domainStates[domainName];
+                    this.tests = this.tests.filter(t => t.domain !== domainName);
+                    this.saveDomains();
+                    this.saveData();
+                }
+            }
+
+            updateDomainDropdowns() {
+                const select = document.getElementById('input-domain');
+                if(!select) return;
+                select.innerHTML = '';
+                this.domains.forEach(d => {
+                    select.innerHTML += `<option value="${d}">${d}</option>`;
+                });
+            }
+
+            loadData() {
+                // الربط السحابي مع النود المستقل الجديد gifted_training_data_v1
+                database.ref('gifted_training_data_v1').on('value', snap => {
+                    const data = snap.val();
+                    if(data) {
+                        this.tests = Array.isArray(data) ? data : Object.values(data);
+                    } else {
+                        const saved = localStorage.getItem('gifted_training_data_v1');
+                        this.tests = saved ? JSON.parse(saved) : [];
+                    }
+                    this.render();
+                });
+            }
+
+            saveData() {
+                localStorage.setItem('gifted_training_data_v1', JSON.stringify(this.tests));
+                database.ref('gifted_training_data_v1').set(this.tests).catch(err => console.error("Error saving to Firebase:", err));
+                this.render();
+            }
+
+            showAlert(title, text) {
+                document.getElementById('message-modal-title').textContent = title;
+                document.getElementById('message-modal-text').textContent = text;
+                document.getElementById('message-modal').classList.remove('hidden');
+            }
+
+            switchTab(tabId) {
+                ['dashboard', 'creator', 'indicators'].forEach(id => {
+                    const el = document.getElementById(`view-${id}`);
+                    if(el) el.classList.add('hidden');
+                    const btn = document.getElementById(`tab-btn-${id}`);
+                    if(btn) btn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+                });
+                document.getElementById(`view-${tabId}`).classList.remove('hidden');
+                const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+                if(activeBtn) activeBtn.className = "px-4 py-2 rounded-xl text-xs font-bold bg-brand-600 text-white transition shadow-sm";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if(tabId === 'creator') this.updateTotalWeight();
+            }
+
+            openCreatorForNew(prefilledDomain = null) {
+                this.editingItemId = null;
+                this.currentPermissions = null;
+                document.getElementById('creator-main-title').textContent = "بناء وتصميم مهمة أو مقياس جديد";
+                document.getElementById('submit-form-btn').innerHTML = `<i class="fa-solid fa-check"></i> حفظ العنصر`;
+                document.getElementById('creation-form').reset();
+                document.getElementById('input-target-weight').value = 100;
+                
+                document.getElementById('input-media-base64').value = '';
+                document.getElementById('media-preview').innerHTML = '';
+                document.getElementById('media-preview-container').classList.add('hidden');
+
+                this.updateDomainDropdowns();
+                
+                if (prefilledDomain) {
+                    document.getElementById('input-domain').value = prefilledDomain;
+                }
+                
+                this.setCreatorType('test');
+                this.updateEnergyBar();
+                this.switchTab('creator');
+                
+                if(!this.introSectionOpen) this.toggleIntroSection();
+            }
+
+            toggleIntroSection() {
+                this.introSectionOpen = !this.introSectionOpen;
+                const content = document.getElementById('intro-settings-content');
+                const icon = document.getElementById('intro-toggle-icon');
+                if(this.introSectionOpen) {
+                    content.classList.remove('hidden');
+                    icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                } else {
+                    content.classList.add('hidden');
+                    icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                }
+            }
+
+            toggleStandardSection(sectionId) {
+                const content = document.getElementById(`content-${sectionId}`);
+                const icon = document.getElementById(`icon-${sectionId}`);
+                if (content.classList.contains('hidden')) {
+                    content.classList.remove('hidden');
+                    icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
+                } else {
+                    content.classList.add('hidden');
+                    icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+                }
+            }
+            
+            toggleStudentsReport(reportId) {
+                const el = document.getElementById(reportId);
+                if(el.classList.contains('hidden')) {
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            }
+
+            updateEnergyBar() {
+                let score = 0;
+                if(document.getElementById('input-title').value.trim()) score += 25;
+                if(document.getElementById('input-domain').value) score += 25;
+                if(document.getElementById('input-unit').value.trim()) score += 25;
+                if(document.getElementById('input-intro').value.trim()) score += 25;
+
+                const bar = document.getElementById('intro-energy-bar');
+                const text = document.getElementById('intro-energy-text');
+                bar.style.width = `${score}%`;
+                text.textContent = `اكتمال البيانات: ${score}%`;
+                
+                if(score === 100) {
+                    bar.classList.replace('bg-rose-500', 'bg-emerald-500');
+                    bar.classList.replace('bg-amber-500', 'bg-emerald-500');
+                } else if (score >= 50) {
+                    bar.classList.replace('bg-rose-500', 'bg-amber-500');
+                    bar.classList.replace('bg-emerald-500', 'bg-amber-500');
+                } else {
+                    bar.classList.replace('bg-emerald-500', 'bg-rose-500');
+                    bar.classList.replace('bg-amber-500', 'bg-rose-500');
+                }
+            }
+
+            updateTotalWeight() {
+                const targetWeight = parseFloat(document.getElementById('input-target-weight').value) || 0;
+                const weights = document.querySelectorAll('.std-weight-input');
+                let total = 0;
+                weights.forEach(w => total += (parseFloat(w.value) || 0));
+                
+                const display = document.getElementById('total-weight-display');
+                const statusText = document.getElementById('weight-status-text');
+                const badge = document.getElementById('total-weight-badge');
+                
+                display.textContent = total;
+                
+                if (total === targetWeight) {
+                    statusText.textContent = `الوزن المستهدف: ${targetWeight} (متطابق ✔️)`;
+                    badge.classList.replace('bg-rose-500', 'bg-emerald-500');
+                    badge.classList.replace('border-rose-400', 'border-emerald-400');
+                } else {
+                    statusText.textContent = `الوزن المستهدف: ${targetWeight} (غير متطابق ⚠️)`;
+                    badge.classList.replace('bg-emerald-500', 'bg-rose-500');
+                    badge.classList.replace('border-emerald-400', 'border-rose-400');
+                }
+            }
+
+            setCreatorType(type) {
+                this.creatorType = type;
+                const testBtn = document.getElementById('creator-type-test-btn');
+                const qBtn = document.getElementById('creator-type-q-btn');
+                
+                if(type === 'test') {
+                    testBtn.className = "p-4 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1.5 border-brand-600 bg-brand-50 text-brand-700 font-black text-xs shadow-xs";
+                    qBtn.className = "p-4 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1.5 border-slate-200 bg-white text-slate-700 font-bold text-xs hover:border-slate-300";
+                } else {
+                    qBtn.className = "p-4 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1.5 border-brand-600 bg-brand-50 text-brand-700 font-black text-xs shadow-xs";
+                    testBtn.className = "p-4 rounded-2xl border-2 text-center transition flex flex-col items-center gap-1.5 border-slate-200 bg-white text-slate-700 font-bold text-xs";
+                }
+                
+                if(!this.editingItemId) this.renderCreatorItems();
+                else {
+                    document.querySelectorAll('.q-type-select').forEach(select => {
+                        const oldVal = select.value;
+                        this.populateQuestionTypeSelect(select);
+                        select.value = oldVal;
+                        if(select.selectedIndex === -1) select.selectedIndex = 0;
+                        this.handleQuestionTypeChange(select);
+                    });
+                }
+            }
+
+            populateQuestionTypeSelect(selectEl, selectedType = null) {
+                if(this.creatorType === 'test') {
+                    selectEl.innerHTML = `
+                        <option value="اختيار من متعدد">اختيار من متعدد</option>
+                        <option value="صواب وخطأ">صواب وخطأ</option>
+                        <option value="إجابة قصيرة ومقالي">إجابة قصيرة ومقالي</option>
+                    `;
+                } else {
+                    selectEl.innerHTML = `
+                        <option value="لوحة شرح تفاعلية">لوحة شرح تفاعلية (تأثير تفاعلي)</option>
+                    `;
+                }
+                if(selectedType) {
+                    const matched = Array.from(selectEl.options).find(o => o.value === selectedType || o.value.includes(selectedType));
+                    if(matched) selectEl.value = matched.value;
+                }
+            }
+
+            renderCreatorItems() {
+                const container = document.getElementById('standards-builder-container');
+                if(!container) return;
+                container.innerHTML = '';
+                this.addStandardSectionRowWithData(container, {
+                    standardTitle: this.creatorType === 'test' ? "المعيار الأول" : "اللوحة التعليمية التفاعلية",
+                    standardWeight: 100,
+                    questions: [{
+                        text: this.creatorType === 'test' ? "اكتب عبارة القياس هنا..." : "وصف اللوحة...",
+                        questionWeight: 10,
+                        qType: this.creatorType === 'test' ? "اختيار من متعدد" : "لوحة شرح تفاعلية",
+                        options: ["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"],
+                        correctAnswerIndex: 0
+                    }]
+                });
+                this.updateTotalWeight();
+            }
+
+            addStandardSectionRow() {
+                const container = document.getElementById('standards-builder-container');
+                this.addStandardSectionRowWithData(container, {
+                    standardTitle: "القسم الجديد",
+                    standardWeight: 20,
+                    questions: [{
+                        text: "العنصر الأول...",
+                        questionWeight: 5,
+                        qType: this.creatorType === 'test' ? "اختيار من متعدد" : "لوحة شرح تفاعلية",
+                        options: ["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"],
+                        correctAnswerIndex: 0
+                    }]
+                });
+                this.updateTotalWeight();
+            }
+
+            addStandardSectionRowWithData(container, stdData) {
+                const sectionId = 'std-' + Math.random().toString(36).substr(2, 9);
+                const stdDiv = document.createElement('div');
+                stdDiv.className = "rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm standard-section-row";
+                
+                stdDiv.innerHTML = `
+                    <div class="p-4 bg-indigo-50/50 hover:bg-indigo-50 transition cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-indigo-100" onclick="app.toggleStandardSection('${sectionId}')">
+                        <div class="flex items-center gap-3 flex-grow w-full sm:w-auto">
+                            <button type="button" class="w-8 h-8 rounded-full bg-white border border-indigo-200 text-indigo-500 flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-chevron-up text-xs" id="icon-${sectionId}"></i>
+                            </button>
+                            <div class="flex-grow" onclick="event.stopPropagation()">
+                                <input type="text" required value="${stdData.standardTitle}" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-black bg-white focus:border-brand-500 outline-none std-title-input" placeholder="عنوان المعيار أو القسم...">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+                            <div class="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                <span class="px-2 text-[10px] font-bold text-slate-500 bg-slate-50 border-l border-slate-200 h-full flex items-center">النقاط/الوزن</span>
+                                <input type="number" min="0" max="1000" oninput="app.updateTotalWeight()" value="${stdData.standardWeight}" class="w-16 px-2 py-2 text-xs font-black bg-white outline-none std-weight-input text-center text-brand-700">
+                            </div>
+                            <button type="button" onclick="this.closest('.standard-section-row').remove(); app.updateTotalWeight();" class="w-9 h-9 rounded-xl bg-white border border-rose-100 text-rose-500 hover:bg-rose-50 flex items-center justify-center transition" title="حذف المعيار"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    </div>
+                    <div id="content-${sectionId}" class="p-4 space-y-3 transition-all duration-300">
+                        <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
+                            <h5 class="text-[11px] font-black text-slate-700"><i class="fa-solid fa-list-check ml-1 text-brand-600"></i> العناصر التابعة لهذا القسم:</h5>
+                            <button type="button" onclick="app.addQuestionRowToStandard(this)" class="px-3 py-1.5 rounded-lg bg-white hover:bg-brand-50 text-brand-700 border border-slate-200 text-[10px] font-bold flex items-center gap-1 shadow-2xs"><i class="fa-solid fa-plus"></i> إضافة عنصر</button>
+                        </div>
+                        <div class="questions-container space-y-3"></div>
+                    </div>
+                `;
+                container.appendChild(stdDiv);
+                const qContainer = stdDiv.querySelector('.questions-container');
+                stdData.questions.forEach(q => this.addQuestionRowWithData(qContainer, q));
+            }
+
+            addQuestionRowToStandard(btn) {
+                const stdDiv = btn.closest('.standard-section-row');
+                const qContainer = stdDiv.querySelector('.questions-container');
+                this.addQuestionRowWithData(qContainer, {
+                    text: this.creatorType === 'test' ? "نص العبارة أو السؤال..." : "عنوان اللوحة التفاعلية...",
+                    questionWeight: 5,
+                    qType: this.creatorType === 'test' ? "اختيار من متعدد" : "لوحة شرح تفاعلية",
+                    options: ["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"],
+                    correctAnswerIndex: 0
+                });
+            }
+
+            handleQuestionMediaUpload(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64Str = e.target.result;
+                    const row = input.closest('.question-row');
+                    const base64Input = row.querySelector('.q-media-base64');
+                    const previewContainer = row.querySelector('.q-media-preview-container');
+                    
+                    if(base64Input) base64Input.value = base64Str;
+                    if(previewContainer) {
+                        previewContainer.classList.remove('hidden');
+                        if (file.type.startsWith('image/')) {
+                            previewContainer.innerHTML = `<img src="${base64Str}" class="max-w-full object-contain h-24 rounded mt-2 border border-slate-200 p-1" />`;
+                        } else if (file.type.startsWith('video/')) {
+                            previewContainer.innerHTML = `<video src="${base64Str}" controls class="max-w-full h-24 rounded mt-2 border border-slate-200 p-1"></video>`;
+                        }
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+
+            addQuestionRowWithData(container, qData) {
+                const qDiv = document.createElement('div');
+                qDiv.className = "p-3.5 rounded-2xl bg-slate-50/50 border border-slate-200 space-y-3 question-row";
+                
+                const typeSelectHTML = `<select class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white q-type-select outline-none focus:border-brand-500" onchange="app.handleQuestionTypeChange(this)"></select>`;
+
+                let previewHtml = '';
+                if (qData.mediaBase64) {
+                     if (qData.mediaBase64.startsWith('data:image')) {
+                         previewHtml = `<img src="${qData.mediaBase64}" class="max-w-full object-contain h-24 rounded mt-2 border border-slate-200 p-1" />`;
+                     } else if (qData.mediaBase64.startsWith('data:video')) {
+                         previewHtml = `<video src="${qData.mediaBase64}" controls class="max-w-full h-24 rounded mt-2 border border-slate-200 p-1"></video>`;
+                     }
                 }
 
-                if (programData) this.saveToCloud(programData, loaderId);
+                qDiv.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <input type="text" required value="${qData.text}" class="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:border-brand-500 outline-none q-text" placeholder="اكتب العنوان الخاص بهذا العنصر...">
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <div class="flex items-center bg-white border border-slate-200 rounded-xl overflow-hidden">
+                                <span class="px-2 text-[9px] font-bold text-slate-500 bg-slate-50 border-l border-slate-200 h-full flex items-center">النقاط</span>
+                                <input type="number" min="0" max="100" value="${qData.questionWeight}" class="w-14 px-1 py-2 text-xs font-bold bg-white outline-none q-weight text-center">
+                            </div>
+                            <button type="button" onclick="this.closest('.question-row').remove()" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 hover:bg-rose-100 flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-slate-200 pt-3 mt-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 mb-1">نوع المحتوى الاستجابة</label>
+                            ${typeSelectHTML}
+                            
+                            <div class="mt-3">
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">صورة أو فيديو (يظهر عند الحل - اختياري):</label>
+                                <input type="file" accept="image/*,video/*" class="w-full px-2 py-1.5 rounded-xl border border-slate-200 text-[10px] bg-white cursor-pointer q-media-input" onchange="app.handleQuestionMediaUpload(this)">
+                                <input type="hidden" class="q-media-base64" value="${qData.mediaBase64 || ''}">
+                                <div class="q-media-preview-container ${qData.mediaBase64 ? '' : 'hidden'}">
+                                    ${previewHtml}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="answer-config-container"></div>
+                    </div>
+
+                    <div class="mt-2 border-t border-slate-200 pt-2">
+                        <label class="block text-[10px] font-bold text-brand-600 mb-1"><i class="fa-solid fa-lightbulb"></i> إثراء إضافي (يظهر للمتدرب بعد الانتهاء - اختياري):</label>
+                        <textarea class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white outline-none focus:border-brand-500 q-explanation" placeholder="أضف شرحاً أو توضيحاً للإجابة الصحيحة أو معلومات إضافية...">${qData.explanation || ''}</textarea>
+                    </div>
+                `;
+                container.appendChild(qDiv);
+                
+                const selectEl = qDiv.querySelector('.q-type-select');
+                this.populateQuestionTypeSelect(selectEl, qData.qType);
+                this.updateAnswerConfigUI(selectEl, qData);
             }
 
-            openManagerModal() {
-                const container = document.getElementById('programs-list-container');
+            handleQuestionTypeChange(selectEl) {
+                this.updateAnswerConfigUI(selectEl, null);
+            }
+
+            updateAnswerConfigUI(selectEl, qData) {
+                const configContainer = selectEl.closest('.question-row').querySelector('.answer-config-container');
+                const type = selectEl.value;
+                const rName = "correct_radio_" + Math.random().toString(36).substring(7);
+
+                if (type === 'لوحة شرح تفاعلية') {
+                    configContainer.innerHTML = `
+                        <label class="block text-[10px] font-bold text-brand-600 mb-1">المحتوى التفاعلي (يظهر للطلاب بتأثير "كلمة بكلمة" جميل):</label>
+                        <textarea class="w-full px-3 py-2 rounded-xl border border-amber-200 outline-none focus:border-brand-500 text-xs font-bold bg-amber-50 edu-content" rows="4" placeholder="اكتب الشرح أو القصة أو المهمة هنا..."></textarea>
+                        <button type="button" onclick="app.previewEduText(this)" class="mt-2 px-3 py-1.5 rounded-lg bg-brand-100 hover:bg-brand-200 text-brand-700 text-[10px] font-bold transition flex items-center gap-1.5"><i class="fa-solid fa-play"></i> معاينة التأثير الجميل</button>
+                    `;
+                    if(qData && qData.correctAnswer) {
+                        configContainer.querySelector('.edu-content').value = qData.correctAnswer;
+                    }
+                } else if (type === 'اختيار من متعدد' || type === 'اختبار من متعدد') {
+                    const opts = qData && qData.options && qData.options.length === 4 ? qData.options : ["الخيار الأول", "الخيار الثاني", "الخيار الثالث", "الخيار الرابع"];
+                    const corrIdx = qData && qData.correctAnswerIndex !== undefined ? qData.correctAnswerIndex : 0;
+                    
+                    configContainer.innerHTML = `
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">الخيارات (حدد الصحيحة):</label>
+                        <div class="space-y-1.5 mcq-box">
+                            ${opts.map((opt, i) => `
+                                <div class="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-slate-200">
+                                    <input type="radio" name="${rName}" value="${i}" ${i === corrIdx ? 'checked' : ''} class="w-4 h-4 mcq-radio cursor-pointer">
+                                    <input type="text" value="${opt}" class="w-full px-2.5 py-1 rounded-lg border border-slate-200 outline-none focus:border-brand-500 text-xs bg-white mcq-opt" placeholder="خيار ${i+1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (type === 'صواب وخطأ') {
+                    const corr = qData ? qData.correctAnswer : "صواب";
+                    configContainer.innerHTML = `
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">الإجابة الصحيحة:</label>
+                        <div class="flex items-center gap-4 pt-2 tf-box bg-white p-2.5 rounded-xl border border-slate-200">
+                            <label class="flex items-center gap-1.5 text-xs font-bold text-slate-800 cursor-pointer"><input type="radio" name="${rName}" value="صواب" ${corr==='صواب'?'checked':''} class="tf-correct-radio"> صواب</label>
+                            <label class="flex items-center gap-1.5 text-xs font-bold text-slate-800 cursor-pointer"><input type="radio" name="${rName}" value="خطأ" ${corr==='خطأ'?'checked':''} class="tf-correct-radio"> خطأ</label>
+                        </div>
+                    `;
+                } else {
+                    const corr = qData ? qData.correctAnswer : "";
+                    configContainer.innerHTML = `
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1">الكلمة المفتاحية للإجابة (اختياري):</label>
+                        <input type="text" value="${corr || ''}" class="w-full px-3 py-2 rounded-xl border border-slate-200 outline-none focus:border-brand-500 text-xs font-bold bg-white short-correct" placeholder="دليل التصحيح...">
+                    `;
+                }
+            }
+
+            previewEduText(btn) {
+                let text = btn.previousElementSibling.value.trim();
+                if(!text) {
+                    alert("يرجى كتابة نص الشرح التفاعلي أولاً ليتم عرضه.");
+                    return;
+                }
+                let container = document.getElementById('edu-preview-content');
+                container.innerHTML = '';
+                let words = text.split(/\s+/);
+                words.forEach((w, i) => {
+                    if(!w.trim()) return;
+                    let span = document.createElement('span');
+                    span.className = "word-by-word inline-block mx-1 px-3 py-1.5 bg-white border-2 border-brand-200 rounded-xl shadow-sm text-brand-700";
+                    span.style.animationDelay = (i * 0.15) + "s";
+                    span.textContent = w;
+                    container.appendChild(span);
+                });
+                document.getElementById('edu-preview-modal').classList.remove('hidden');
+            }
+
+            handleFormSubmit(event) {
+                event.preventDefault();
+                const title = document.getElementById('input-title').value.trim();
+                const domain = document.getElementById('input-domain').value;
+                const unitName = document.getElementById('input-unit').value.trim();
+                const introText = document.getElementById('input-intro').value.trim();
+                const duration = parseInt(document.getElementById('input-duration').value) || 30;
+                const targetWeight = parseFloat(document.getElementById('input-target-weight').value) || 100;
+                const colorTheme = document.getElementById('input-color').value;
+                const mediaBase64 = document.getElementById('input-media-base64').value;
+
+                const stdRows = document.querySelectorAll('.standard-section-row');
+                const standardsSections = [];
+                let totalWeight = 0;
+
+                stdRows.forEach(stdRow => {
+                    const standardTitle = stdRow.querySelector('.std-title-input').value.trim();
+                    const standardWeight = parseFloat(stdRow.querySelector('.std-weight-input').value) || 0;
+                    totalWeight += standardWeight;
+                    
+                    const questions = [];
+
+                    stdRow.querySelectorAll('.question-row').forEach(row => {
+                        const text = row.querySelector('.q-text').value.trim();
+                        const questionWeight = parseFloat(row.querySelector('.q-weight').value) || 0;
+                        const qType = row.querySelector('.q-type-select').value;
+                        const questionMediaBase64 = row.querySelector('.q-media-base64').value; 
+                        const explanation = row.querySelector('.q-explanation').value.trim();
+                        
+                        let options = [];
+                        let correctAnswerIndex = 0;
+                        let correctAnswer = "";
+
+                        if (qType === 'لوحة شرح تفاعلية') {
+                            let eduContent = row.querySelector('.edu-content');
+                            correctAnswer = eduContent ? eduContent.value.trim() : "";
+                            options = [correctAnswer];
+                        } else if (qType.includes('متعدد')) {
+                            row.querySelectorAll('.mcq-opt').forEach(inp => options.push(inp.value.trim()));
+                            const radios = row.querySelectorAll('.mcq-radio');
+                            radios.forEach((r, idx) => { if(r.checked) correctAnswerIndex = idx; });
+                            correctAnswer = options[correctAnswerIndex] || "";
+                        } else if (qType === 'صواب وخطأ') {
+                            options = ["صواب", "خطأ"];
+                            const checked = row.querySelector('.tf-correct-radio:checked');
+                            correctAnswer = checked ? checked.value : "صواب";
+                        } else {
+                            correctAnswer = row.querySelector('.short-correct').value.trim();
+                        }
+
+                        if(text) {
+                            questions.push({ 
+                                text, questionWeight, qType, options, 
+                                correctAnswerIndex, correctAnswer, 
+                                mediaBase64: questionMediaBase64, explanation 
+                            });
+                        }
+                    });
+
+                    if(standardTitle && questions.length > 0) {
+                        standardsSections.push({ standardTitle, standardWeight, questions });
+                    }
+                });
+
+                if(standardsSections.length === 0) { this.showAlert("تنبيه", "يرجى إضافة قسم واحد على الأقل مع عناصره."); return; }
+                if(totalWeight !== targetWeight) {
+                    if(!confirm(`مجموع النقاط/الوزن للأقسام (${totalWeight}) لا يطابق المستهدف (${targetWeight}). هل تريد المتابعة على أي حال؟`)) {
+                        return;
+                    }
+                }
+
+                this.pendingPublishData = {
+                    id: this.editingItemId ? this.editingItemId : Date.now(),
+                    type: this.creatorType,
+                    title, domain, unitName, introText, duration, colorTheme, 
+                    mediaBase64,
+                    standardsSections, totalWeight, targetWeight,
+                    permissions: this.currentPermissions,
+                    status: this.editingItemId ? (this.tests.find(t=>t.id===this.editingItemId)?.status || 'active') : 'active',
+                    viewedBy: this.editingItemId ? (this.tests.find(t=>t.id===this.editingItemId)?.viewedBy || {}) : {}
+                };
+
+                if(this.editingItemId) {
+                    const idx = this.tests.findIndex(t => t.id === this.editingItemId);
+                    if(idx !== -1) this.tests[idx] = this.pendingPublishData;
+                    this.editingItemId = null;
+                } else {
+                    this.tests.unshift(this.pendingPublishData);
+                }
+
+                this.saveData();
+                this.switchTab('dashboard');
+                this.showAlert("تم الحفظ", "تم حفظ العنصر بنجاح. يمكنك إدارته ونشره من خلال لوحة التحكم.");
+                document.getElementById('submit-form-btn').innerHTML = `<i class="fa-solid fa-check"></i> حفظ العنصر`;
+            }
+            
+            toggleTestStatus(id) {
+                const idx = this.tests.findIndex(t => t.id === id);
+                if(idx !== -1) {
+                    this.tests[idx].status = this.tests[idx].status === 'closed' ? 'active' : 'closed';
+                    this.saveData();
+                }
+            }
+
+            openShareModal(id) {
+                const item = this.tests.find(t => t.id === id);
+                if(!item) return;
+                
+                this.currentSharingTestId = id;
+                this.selectAllState = false;
+                document.getElementById('selectAllBtn').textContent = "تحديد الكل";
+                document.getElementById('sendWhatsappCheck').checked = false;
+                
+                const statusSelect = document.getElementById('targetStatusSelect');
+                if(statusSelect) statusSelect.value = 'all';
+
+                if (item.permissions && item.permissions.type) {
+                    if(item.permissions.type === 'teachers_db') {
+                        document.getElementById('radio_teachers').checked = true;
+                    } else if(item.permissions.type === 'students_db') {
+                        document.getElementById('radio_students').checked = true;
+                        let cName = item.permissions.details.replace('طلاب محددين من ', '').replace('متدربين/طلاب محددين من ', '');
+                        if (cName === 'فصول مختلفة' || cName === 'الكل') cName = 'الكل';
+                        document.getElementById('targetClassSelect').value = cName || 'الكل';
+                    }
+                } else {
+                    document.getElementById('radio_teachers').checked = true;
+                }
+                
+                document.getElementById('share-modal').classList.remove('hidden');
+                this.togglePublishOptions();
+            }
+
+            togglePublishOptions() {
+                const target = document.querySelector('input[name="publishTarget"]:checked').value;
+                const classBox = document.getElementById('studentsClassesBox');
+                
+                this.selectAllState = false;
+                document.getElementById('selectAllBtn').textContent = "تحديد الكل";
+
+                if (target === 'students_db') {
+                    classBox.classList.remove('hidden');
+                } else {
+                    classBox.classList.add('hidden');
+                }
+                this.renderPublishTargets();
+            }
+            
+            updateTargetClassSelectChange() {
+                this.selectAllState = false;
+                document.getElementById('selectAllBtn').textContent = "تحديد الكل";
+                this.renderPublishTargets();
+            }
+
+            renderPublishTargets() {
+                const target = document.querySelector('input[name="publishTarget"]:checked').value;
+                const statusFilter = document.getElementById('targetStatusSelect') ? document.getElementById('targetStatusSelect').value : 'all';
+                const container = document.getElementById('targetListContainer');
                 container.innerHTML = '';
                 
-                if (this.programs.length === 0) {
-                    container.innerHTML = `<p class="text-center text-xs text-slate-400 py-6">لا توجد برامج مرفوعة حالياً. قم بتوليد بعض البرامج أولاً.</p>`;
+                const testItem = this.tests.find(t => t.id === this.currentSharingTestId);
+                const viewedBy = testItem && testItem.viewedBy ? testItem.viewedBy : {};
+                const results = testItem && testItem.results ? testItem.results : [];
+                const completedNames = results.map(r => r.studentName);
+
+                let dataToRender = [];
+
+                if(target === 'teachers_db') {
+                    dataToRender = this.dbTeachers;
+                } else if(target === 'students_db') {
+                    const selectedClass = document.getElementById('targetClassSelect').value;
+                    if(selectedClass === 'الكل') {
+                        dataToRender = this.dbStudents.filter(s => this.classesList.includes(s.class));
+                    } else {
+                        dataToRender = this.dbStudents.filter(s => s.class === selectedClass);
+                    }
+                }
+
+                dataToRender = dataToRender.filter(person => {
+                    const isCompleted = completedNames.includes(person.name);
+                    
+                    if (statusFilter === 'pending') return !isCompleted;
+                    if (statusFilter === 'completed') return isCompleted;
+                    return true;
+                });
+
+                if(dataToRender.length === 0) {
+                    container.innerHTML = `<div class="p-4 text-center text-[10px] text-slate-400 font-bold">لا توجد بيانات متاحة لهذا التصنيف أو الفلتر المختار.</div>`;
+                    return;
+                }
+
+                dataToRender.forEach(person => {
+                    const isCompleted = completedNames.includes(person.name);
+                    const isViewed = viewedBy[person.id];
+                    
+                    let statusBadge = '';
+                    if (isCompleted) {
+                        statusBadge = `<span class="text-[9px] text-emerald-600 font-black bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 mr-1">أتم الحل</span>`;
+                    } else if (isViewed) {
+                        statusBadge = `<span class="text-[9px] text-amber-600 font-black bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 mr-1">اطلع ولم يحل</span>`;
+                    } else {
+                        statusBadge = `<span class="text-[9px] text-rose-500 font-bold bg-rose-50 px-1.5 py-0.5 rounded border border-rose-100 mr-1">لم يطلع</span>`;
+                    }
+
+                    const extraInfo = person.class ? `<span class="text-[9px] text-slate-400 font-normal mr-1">(${person.class})</span>` : '';
+                    container.innerHTML += `
+                        <label class="flex items-center gap-2 p-2 rounded-lg border border-transparent hover:bg-slate-50 hover:border-slate-100 cursor-pointer transition">
+                            <input type="checkbox" value="${person.id}" class="w-3.5 h-3.5 text-brand-600 rounded target-checkbox">
+                            <span class="text-[11px] font-bold text-slate-700">${person.name} ${extraInfo}${statusBadge}</span>
+                        </label>
+                    `;
+                });
+            }
+
+            toggleSelectAllTargets() {
+                this.selectAllState = !this.selectAllState;
+                const checkboxes = document.querySelectorAll('.target-checkbox');
+                checkboxes.forEach(cb => cb.checked = this.selectAllState);
+                document.getElementById('selectAllBtn').textContent = this.selectAllState ? "إلغاء التحديد" : "تحديد الكل";
+            }
+
+            closeShareModal() {
+                document.getElementById('share-modal').classList.add('hidden');
+                this.currentSharingTestId = null;
+            }
+
+            confirmPublish() {
+                const targetType = document.querySelector('input[name="publishTarget"]:checked').value;
+                const sendWhatsapp = document.getElementById('sendWhatsappCheck').checked;
+                
+                const checkedBoxes = Array.from(document.querySelectorAll('.target-checkbox:checked'));
+                if(checkedBoxes.length === 0) {
+                    this.showAlert("تنبيه", "الرجاء تحديد مستفيد واحد على الأقل من القائمة.");
+                    return;
+                }
+
+                const statusFilter = document.getElementById('targetStatusSelect') ? document.getElementById('targetStatusSelect').value : 'all';
+                let permissions = { type: targetType, details: "", selectedIds: checkedBoxes.map(cb => cb.value) };
+
+                if(targetType === 'teachers_db') {
+                    permissions.details = "مجموعة محددة من المعلمين";
+                } else if(targetType === 'students_db') {
+                    const selectedClass = document.getElementById('targetClassSelect').value;
+                    permissions.details = selectedClass === 'الكل' ? "طلاب محددين من فصول مختلفة" : `متدربين/طلاب محددين من ${selectedClass}`;
+                }
+
+                const idx = this.tests.findIndex(t => t.id === this.currentSharingTestId);
+                const testIdToShare = this.currentSharingTestId;
+
+                if(idx !== -1) {
+                    if (statusFilter === 'all') {
+                        this.tests[idx].permissions = permissions;
+                        this.tests[idx].targetAudience = permissions.details;
+                        this.saveData();
+                    }
+                }
+
+                this.closeShareModal();
+
+                if (sendWhatsapp && idx !== -1) {
+                    this.openWhatsappDispatcher(targetType, permissions.selectedIds, this.tests[idx].title, this.tests[idx].type, testIdToShare);
                 } else {
-                    this.programs.forEach(p => {
-                        container.innerHTML += `
-                            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    this.showAlert("تم الاعتماد بنجاح", `تم تحديث وإدارة صلاحيات النشر بنجاح.`);
+                }
+            }
+
+            generateWaLink(person, itemTitle, itemTypeName, testId, isCompleted, isViewed) {
+                const formattedPhone = this.formatPhoneForWhatsApp(person.phone);
+                if(!formattedPhone) return '#';
+
+                const testLink = `https://usayd-school.github.io/giftedportal/?testId=${testId}`;
+                let msg = '';
+                
+                if (isCompleted) {
+                    msg = `مرحباً ${person.name}،\nشكراً لك 🌹\nلقد استلمنا مشاركتك بنجاح في (${itemTypeName}):\n📌 *${itemTitle}*\nنقدر لك التزامك.\nمع تحيات إدارة التدريب المدرسي.`;
+                } else if (isViewed) {
+                    msg = `مرحباً ${person.name}،\nلاحظنا دخولك لـ (${itemTypeName}):\n📌 *${itemTitle}*\nولكن لم تقم بالإنهاء وتأكيد التسليم.\nنرجو منك استكمال المطلوب عبر الرابط المخصص لك:\n🔗 ${testLink}\nبالتوفيق!`;
+                } else {
+                    msg = `مرحباً ${person.name}،\nنذكرك بأهمية الدخول وإتمام (${itemTypeName}) المخصص لك بعنوان:\n📌 *${itemTitle}*\nيرجى الدخول للرابط التالي للبدء:\n🔗 ${testLink}\nبانتظارك 🌟`;
+                }
+                
+                return `https://api.whatsapp.com/send?phone=${formattedPhone}&text=${encodeURIComponent(msg)}`;
+            }
+
+            openWhatsappDispatcher(targetType, selectedIds, testTitle, itemType, testId) {
+                const modal = document.getElementById('whatsapp-modal');
+                const listContainer = document.getElementById('wa-list');
+                listContainer.innerHTML = '';
+
+                const dbSource = targetType === 'teachers_db' ? this.dbTeachers : this.dbStudents;
+                const selectedPeople = dbSource.filter(p => selectedIds.includes(p.id));
+                const itemTypeName = itemType === 'test' ? 'برنامج تدريبي' : 'مهمة تعليمية';
+
+                const testItem = this.tests.find(t => t.id === testId);
+                const viewedBy = testItem && testItem.viewedBy ? testItem.viewedBy : {};
+                const results = testItem && testItem.results ? testItem.results : [];
+                const completedNames = results.map(r => r.studentName);
+
+                selectedPeople.forEach((person, idx) => {
+                    const isCompleted = completedNames.includes(person.name);
+                    const isViewed = viewedBy[person.id];
+                    
+                    let hasViewedBadge = '';
+                    if (isCompleted) hasViewedBadge = '<span class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-black mr-2">أتم الحل</span>';
+                    else if (isViewed) hasViewedBadge = '<span class="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded font-black mr-2">اطلع ولم يحل</span>';
+                    else hasViewedBadge = '<span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold mr-2">لم يطلع</span>';
+
+                    const waLink = this.generateWaLink(person, testTitle, itemTypeName, testId, isCompleted, isViewed);
+                    const formattedPhone = this.formatPhoneForWhatsApp(person.phone);
+                    
+                    const onclickAction = formattedPhone ? `window.open('${waLink}', '_blank'); this.classList.replace('bg-emerald-600', 'bg-slate-300'); this.classList.replace('hover:bg-emerald-700', 'text-slate-500'); this.innerHTML='<i class=\\'fa-solid fa-check\\'></i> تم'; return false;` : 'return false;';
+
+                    const btnHtml = formattedPhone 
+                        ? `<button onclick="${onclickAction}" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-black transition flex items-center gap-1.5 shadow-sm"><i class="fa-brands fa-whatsapp text-sm"></i> إرسال ذكي</button>`
+                        : `<span class="px-3 py-1.5 bg-slate-100 text-slate-400 rounded-lg text-[10px] font-bold">لا يوجد رقم</span>`;
+
+                    listContainer.innerHTML += `
+                        <div class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                            <div>
+                                <h5 class="text-xs font-black text-slate-800">${person.name}${hasViewedBadge}</h5>
+                                <p class="text-[10px] text-slate-500 font-bold mt-0.5" dir="ltr">${formattedPhone ? '+'+formattedPhone : 'غير متوفر'}</p>
+                            </div>
+                            ${btnHtml}
+                        </div>
+                    `;
+                });
+
+                modal.classList.remove('hidden');
+            }
+
+            render() {
+                this.renderDashboard();
+                this.renderComprehensiveIndicators();
+            }
+
+            renderDashboard() {
+                const container = document.getElementById('collapsible-domains-container');
+                if(!container) return;
+                container.innerHTML = '';
+
+                this.domains.forEach((domainName, index) => {
+                    const isOpen = this.domainStates[domainName];
+                    const domainItems = this.tests.filter(t => t.domain === domainName);
+
+                    const domainCard = document.createElement('div');
+                    domainCard.className = "glass-card rounded-3xl overflow-hidden border border-slate-200 bg-white shadow-xs transition";
+                    
+                    domainCard.innerHTML = `
+                        <div class="p-5 bg-gradient-to-r from-slate-50 to-indigo-50/40 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 cursor-pointer select-none flex-grow" onclick="app.toggleDomain('${domainName.replace(/'/g, "\\'")}')">
+                                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-sm shadow-sm">0${index + 1}</div>
                                 <div>
-                                    <span class="px-2 py-0.5 rounded bg-brand-50 text-brand-700 text-[10px] font-black">${p.domain}</span>
-                                    <h4 class="text-sm font-black text-slate-900 mt-1">${p.title}</h4>
-                                    <p class="text-[10px] text-slate-500 font-bold mt-0.5">الوحدة: ${p.unitName}</p>
+                                    <h4 class="text-base font-black text-slate-900">${domainName}</h4>
+                                    <p class="text-[11px] text-slate-500 font-bold">${domainItems.length} مهمة/عنصر متوفر</p>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="app.openEditModal(${p.id})" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-pen"></i> تعديل ونقل</button>
-                                    <button onclick="app.deleteProgram(${p.id})" class="w-8 h-8 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl text-xs flex items-center justify-center transition"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                            <div class="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+                                <button onclick="event.stopPropagation(); app.openCreatorForNew('${domainName.replace(/'/g, "\\'")}')" class="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-sm">
+                                    <i class="fa-solid fa-plus"></i> إضافة هنا
+                                </button>
+                                <button onclick="event.stopPropagation(); app.renameDomain('${domainName.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold transition shadow-2xs" title="إعادة تسمية المجال (📝)">
+                                    <i class="fa-solid fa-pen text-[10px]"></i>
+                                </button>
+                                <button onclick="event.stopPropagation(); app.deleteDomain('${domainName.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs font-bold transition shadow-2xs" title="حذف المجال (X)">
+                                    <i class="fa-solid fa-trash text-[10px]"></i>
+                                </button>
+                                <button onclick="app.toggleDomain('${domainName.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition">
+                                    <i class="fa-solid ${isOpen ? 'fa-chevron-up' : 'fa-chevron-down'} text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-5 space-y-4 accordion-content ${isOpen ? 'block opacity-100' : 'hidden opacity-0'}">
+                            ${domainItems.length === 0 ? `<div class="text-center py-6 text-slate-400 text-xs bg-slate-50 rounded-2xl border border-dashed border-slate-200">لا توجد عناصر مسجلة في هذا المجال حالياً. استخدم زر الإضافة لإنشائها.</div>` : `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${domainItems.map(item => this.createCardHtml(item)).join('')}</div>`}
+                        </div>
+                    `;
+                    container.appendChild(domainCard);
+                });
+            }
+
+            createCardHtml(item) {
+                const badgeText = item.type === 'test' ? 'برنامج تدريبي' : (item.type === 'edu_task' ? 'مهمة تعليمية (شرح)' : 'استبانة/مقياس');
+                const badgeClass = item.type === 'test' ? 'bg-indigo-100 text-indigo-700' : (item.type === 'edu_task' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700');
+                const targetW = item.targetWeight || item.totalWeight || 100;
+                const weightColor = item.totalWeight === targetW ? 'bg-slate-100 text-slate-600' : 'bg-rose-100 text-rose-600 border border-rose-200';
+                const weightLabel = item.totalWeight ? `<span class="text-[10px] ${weightColor} px-2 py-0.5 rounded-md font-bold" title="الوزن المستهدف: ${targetW}">النقاط/الوزن: ${item.totalWeight}/${targetW}</span>` : '';
+                
+                const isActive = item.status !== 'closed';
+                const statusBadgeClass = isActive ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200';
+                const statusText = isActive ? '<i class="fa-solid fa-lock-open ml-1"></i> متاح' : '<i class="fa-solid fa-lock ml-1"></i> مغلق';
+                const toggleBtnText = isActive ? 'إقفال الإتاحة' : 'إتاحة العنصر';
+                const toggleBtnClass = isActive ? 'bg-rose-50 hover:bg-rose-100 text-rose-600' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-600';
+
+                return `
+                    <div class="glass-card rounded-2xl p-5 space-y-3 border border-slate-200 bg-white relative">
+                        <div class="absolute top-4 left-4 px-2 py-1 rounded-md text-[10px] font-black border ${statusBadgeClass}">
+                            ${statusText}
+                        </div>
+
+                        <div class="flex items-center justify-between pl-16">
+                            <div class="flex items-center gap-1">
+                                <span class="px-2.5 py-0.5 rounded-full ${badgeClass} text-[10px] font-black">${badgeText}</span>
+                                ${weightLabel}
+                            </div>
+                        </div>
+                        
+                        <div class="pt-1">
+                            <h4 class="text-sm font-black text-slate-900 pr-1">${item.title}</h4>
+                            <p class="text-[11px] text-brand-600 font-bold mt-1 pr-1"><i class="fa-solid fa-folder-open ml-1"></i> ${item.unitName}</p>
+                            <p class="text-[10px] text-slate-500 font-bold mt-1 pr-1">الصلاحية والنشر: <span class="text-slate-700 bg-slate-50 px-1 py-0.5 rounded">${item.targetAudience || 'لم يتم تحديد النشر'}</span></p>
+                        </div>
+
+                        <div class="pt-3 mt-3 flex items-center justify-between border-t border-slate-100">
+                            <button onclick="app.toggleTestStatus(${item.id})" class="px-3 py-1.5 rounded-lg text-[10px] font-bold transition ${toggleBtnClass}">
+                                ${toggleBtnText}
+                            </button>
+                            
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="app.openShareModal(${item.id})" class="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1"><i class="fa-solid fa-share-nodes"></i> النشر</button>
+                                <button onclick="app.editItem(${item.id})" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-xs transition"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="app.deleteItem(${item.id})" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center text-xs transition"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            editItem(id) {
+                const item = this.tests.find(t => t.id === id);
+                if(!item) return;
+                this.editingItemId = id;
+                this.currentPermissions = item.permissions || null; 
+                
+                this.updateDomainDropdowns();
+                document.getElementById('creator-main-title').textContent = `تعديل العنصر: ${item.title}`;
+                document.getElementById('input-title').value = item.title;
+                document.getElementById('input-domain').value = item.domain;
+                document.getElementById('input-unit').value = item.unitName;
+                document.getElementById('input-duration').value = item.duration || 30;
+                document.getElementById('input-target-weight').value = item.targetWeight || item.totalWeight || 100;
+                document.getElementById('input-color').value = item.colorTheme || 'indigo';
+                document.getElementById('input-intro').value = item.introText || '';
+                
+                const base64Input = document.getElementById('input-media-base64');
+                const previewContainer = document.getElementById('media-preview');
+                const wrapper = document.getElementById('media-preview-container');
+                
+                base64Input.value = item.mediaBase64 || '';
+                if(item.mediaBase64) {
+                    wrapper.classList.remove('hidden');
+                    if (item.mediaBase64.includes('image')) {
+                        previewContainer.innerHTML = `<img src="${item.mediaBase64}" class="max-w-full object-contain h-32 rounded" />`;
+                    } else if (item.mediaBase64.includes('video')) {
+                        previewContainer.innerHTML = `<video src="${item.mediaBase64}" controls class="max-w-full h-32 rounded"></video>`;
+                    }
+                } else {
+                    wrapper.classList.add('hidden');
+                    previewContainer.innerHTML = '';
+                }
+
+                this.setCreatorType(item.type);
+                this.updateEnergyBar();
+                if(this.introSectionOpen) this.toggleIntroSection(); 
+
+                const container = document.getElementById('standards-builder-container');
+                container.innerHTML = '';
+                item.standardsSections.forEach(std => {
+                    this.addStandardSectionRowWithData(container, std);
+                });
+                
+                const allContents = container.querySelectorAll('[id^="content-std-"]');
+                const allIcons = container.querySelectorAll('[id^="icon-std-"]');
+                allContents.forEach(c => c.classList.add('hidden'));
+                allIcons.forEach(i => i.classList.replace('fa-chevron-up', 'fa-chevron-down'));
+                
+                this.updateTotalWeight();
+                this.switchTab('creator');
+            }
+
+            deleteItem(id) {
+                if(confirm("هل أنت متأكد من الحذف النهائي؟ لا يمكن التراجع.")) {
+                    this.tests = this.tests.filter(t => t.id !== id);
+                    this.saveData();
+                }
+            }
+
+            toggleDomain(name) { this.domainStates[name] = !this.domainStates[name]; this.renderDashboard(); }
+            expandAllDomains() { this.domains.forEach(d => this.domainStates[d] = true); this.renderDashboard(); }
+            collapseAllDomains() { this.domains.forEach(d => this.domainStates[d] = false); this.renderDashboard(); }
+
+            renderComprehensiveIndicators() {
+                const container = document.getElementById('comprehensive-indicators-grid');
+                if(!container) return;
+                container.innerHTML = '';
+
+                if(this.tests.length === 0) {
+                    container.innerHTML = `<div class="col-span-full text-center p-8 text-slate-500 font-bold text-sm bg-white rounded-3xl border border-dashed border-slate-300">لا توجد بيانات أو عناصر لعرض مؤشراتها حالياً.</div>`;
+                    return;
+                }
+
+                this.tests.forEach((item) => {
+                    let results = item.results || [];
+                    let targetIds = item.permissions && item.permissions.selectedIds ? item.permissions.selectedIds : [];
+                    let targetCount = targetIds.length > 0 ? targetIds.length : (results.length > 0 ? results.length : 35);
+                    
+                    let standardAveragesHTML = '';
+                    item.standardsSections.forEach(std => {
+                        let totalStdScore = 0;
+                        results.forEach(r => totalStdScore += (r.standardScores[std.standardTitle] || 0));
+                        let avg = results.length > 0 ? (totalStdScore / results.length).toFixed(1) : 0;
+                        let weight = parseFloat(std.standardWeight) || 0;
+                        let percentage = weight > 0 ? ((avg / weight) * 100).toFixed(0) : 0;
+                        
+                        let colorClass = percentage >= 80 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : (percentage >= 50 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-rose-500 to-rose-400');
+                        let shadowClass = percentage >= 80 ? 'shadow-emerald-500/30' : (percentage >= 50 ? 'shadow-amber-500/30' : 'shadow-rose-500/30');
+
+                        standardAveragesHTML += `
+                            <div class="mb-4 bg-slate-50/50 p-3 rounded-xl border border-slate-100 transition hover:border-slate-200 hover:bg-slate-50">
+                                <div class="flex justify-between items-end text-[11px] font-bold text-slate-700 mb-2">
+                                    <span class="truncate max-w-[65%] flex items-center gap-1.5"><i class="fa-solid fa-crosshairs text-slate-400 text-[10px]"></i> ${std.standardTitle}</span>
+                                    <span class="text-slate-800 font-black bg-white px-2 py-0.5 rounded shadow-sm border border-slate-100">${avg} <span class="text-slate-400 font-normal">/ ${weight}</span> <span class="${percentage >= 50 ? 'text-brand-600' : 'text-rose-600'}">(${percentage}%)</span></span>
+                                </div>
+                                <div class="h-3 w-full bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                                    <div class="h-full ${colorClass} progress-bar-fill shadow-lg ${shadowClass} relative" style="width: ${percentage}%">
+                                        <div class="absolute inset-0 bg-white/20 w-full h-full" style="background-image: linear-gradient(45deg, rgba(255,255,255,.15) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.15) 50%, rgba(255,255,255,.15) 75%, transparent 75%, transparent); background-size: 1rem 1rem;"></div>
+                                    </div>
                                 </div>
                             </div>
                         `;
                     });
-                }
-                document.getElementById('manager-modal').classList.remove('hidden');
-            }
 
-            openEditModal(id) {
-                const p = this.programs.find(item => item.id === id);
-                if(!p) return;
-                
-                document.getElementById('edit-program-id').value = p.id;
-                document.getElementById('edit-program-title').value = p.title;
-                document.getElementById('edit-program-unit').value = p.unitName;
-                document.getElementById('edit-program-domain').value = p.domain;
-                
-                document.getElementById('edit-modal').classList.remove('hidden');
-            }
-
-            saveEditedProgram() {
-                const id = parseInt(document.getElementById('edit-program-id').value);
-                const newTitle = document.getElementById('edit-program-title').value.trim();
-                const newUnit = document.getElementById('edit-program-unit').value.trim();
-                const newDomain = document.getElementById('edit-program-domain').value;
-
-                const idx = this.programs.findIndex(item => item.id === id);
-                if(idx !== -1) {
-                    this.programs[idx].title = newTitle;
-                    this.programs[idx].unitName = newUnit;
-                    this.programs[idx].domain = newDomain;
-
-                    dbRef.set(this.programs).then(() => {
-                        document.getElementById('edit-modal').classList.add('hidden');
-                        this.openManagerModal(); // إعادة تحديث القائمة
-                        alert("✅ تم تعديل المسمى ونقل البرنامج بنجاح!");
+                    // بناء الأعمدة الديناميكية لجدول الطلاب 
+                    let theadHTML = `
+                        <tr>
+                            <th class="py-3 px-3 text-[9px] font-black text-slate-500 uppercase text-right border-b border-slate-200">الاسم والحالة</th>
+                            <th class="py-3 px-3 text-[9px] font-black text-brand-600 text-center uppercase border-b border-slate-200 border-x border-slate-100 bg-brand-50/50">المجموع</th>
+                    `;
+                    item.standardsSections.forEach(std => {
+                         theadHTML += `<th class="py-3 px-2 text-[8px] font-black text-slate-500 text-center uppercase truncate max-w-[70px] border-b border-slate-200" title="${std.standardTitle}">${std.standardTitle}</th>`;
                     });
-                }
-            }
+                    theadHTML += `<th class="py-3 px-3 text-[9px] font-black text-slate-500 text-center uppercase border-b border-slate-200">مراسلة</th></tr>`;
 
-            deleteProgram(id) {
-                if(confirm("هل أنت متأكد من حذف هذا البرنامج من السحابة؟")) {
-                    this.programs = this.programs.filter(item => item.id !== id);
-                    dbRef.set(this.programs).then(() => {
-                        this.openManagerModal();
+                    const allUsers = [...this.dbStudents, ...this.dbTeachers];
+                    let targetPeople = [];
+                    if (targetIds.length > 0) {
+                        targetPeople = targetIds.map(id => allUsers.find(u => u.id === id) || {id: id, name: "مستخدم غير معروف", phone: ""});
+                    } else if (results.length > 0) {
+                        targetPeople = results.map(r => ({id: Math.random().toString(), name: r.studentName, phone: r.studentPhone || ''}));
+                    }
+
+                    let studentsRowsHTML = '';
+                    targetPeople.forEach(person => {
+                        let r = results.find(res => res.studentName === person.name);
+                        let hasViewed = item.viewedBy && item.viewedBy[person.id];
+                        
+                        let statusBadge = '';
+                        let rowBg = 'hover:bg-slate-50';
+                        if (r) {
+                            statusBadge = `<span class="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded font-black mr-1 flex-shrink-0 whitespace-nowrap"><i class="fa-solid fa-check"></i> أتم الحل</span>`;
+                            rowBg = 'bg-emerald-50/30 hover:bg-emerald-50/60';
+                        } else if (hasViewed) {
+                            statusBadge = `<span class="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-black mr-1 flex-shrink-0 whitespace-nowrap"><i class="fa-solid fa-eye"></i> لم يكمل</span>`;
+                            rowBg = 'bg-amber-50/20 hover:bg-amber-50/40';
+                        } else {
+                            statusBadge = `<span class="text-[9px] bg-rose-50 text-rose-500 px-1.5 py-0.5 rounded font-bold mr-1 flex-shrink-0 whitespace-nowrap"><i class="fa-solid fa-xmark"></i> لم يطلع</span>`;
+                        }
+
+                        let stdColsHTML = '';
+                        item.standardsSections.forEach(std => {
+                            let sScore = r && r.standardScores ? (r.standardScores[std.standardTitle] || 0) : 0;
+                            let max = parseFloat(std.standardWeight) || 0;
+                            let pct = max > 0 ? ((sScore/max)*100) : 0;
+                            let color = pct >= 80 ? 'text-emerald-600 font-black' : (pct >= 50 ? 'text-amber-500 font-bold' : 'text-rose-500 font-bold');
+                            
+                            if(!r) {
+                                stdColsHTML += `<td class="py-2.5 px-2 text-[10px] text-slate-300 text-center">-</td>`;
+                            } else {
+                                stdColsHTML += `<td class="py-2.5 px-2 text-[10px] text-center ${color}">${sScore}<span class="text-[7px] text-slate-400">/${max}</span></td>`;
+                            }
+                        });
+
+                        let totalScoreText = r ? `<span class="font-black text-brand-600">${r.totalScore}</span> <span class="text-[8px] text-slate-400 font-normal">/ ${item.targetWeight || item.totalWeight}</span>` : `<span class="text-slate-300 font-bold">-</span>`;
+                        
+                        let waLink = this.generateWaLink(person, item.title, item.type === 'test' ? 'اختبار' : 'مهمة', item.id, !!r, hasViewed);
+                        let waActionBtn = waLink !== '#' 
+                            ? `<a href="${waLink}" target="_blank" class="w-7 h-7 flex items-center justify-center bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-lg text-[10px] transition shadow-2xs mx-auto"><i class="fa-brands fa-whatsapp"></i></a>`
+                            : `<span class="text-[8px] text-slate-300">لا رقم</span>`;
+
+                        studentsRowsHTML += `
+                            <tr class="border-b border-slate-100 last:border-0 transition ${rowBg}">
+                                <td class="py-2.5 px-3">
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-[11px] font-bold text-slate-800 leading-none">${person.name}</span>
+                                        <div class="flex">${statusBadge}</div>
+                                    </div>
+                                </td>
+                                <td class="py-2.5 px-3 text-[11px] text-center border-x border-slate-100/60 bg-white/40">${totalScoreText}</td>
+                                ${stdColsHTML}
+                                <td class="py-2.5 px-3 text-center">${waActionBtn}</td>
+                            </tr>
+                        `;
                     });
-                }
+
+                    const completionRate = targetCount > 0 ? Math.min(100, Math.round((results.length / targetCount) * 100)) : 0;
+                    let circleColor = completionRate >= 80 ? 'border-emerald-500 text-emerald-600' : (completionRate >= 50 ? 'border-amber-400 text-amber-600' : 'border-brand-500 text-brand-600');
+
+                    const cardHTML = `
+                        <div class="glass-card rounded-3xl p-6 space-y-5 bg-white border border-slate-200 shadow-sm flex flex-col">
+                            
+                            <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+                                <div>
+                                    <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 text-[9px] font-black mb-2 inline-block">${item.type === 'test' ? 'برنامج تدريبي/مقاييس' : 'مهمة تعليمية/شرح'}</span>
+                                    <h4 class="text-sm font-black text-slate-900 leading-tight">${item.title}</h4>
+                                    <p class="text-[10px] text-slate-500 mt-1 font-bold"><i class="fa-solid fa-folder-open ml-0.5"></i> ${item.unitName}</p>
+                                </div>
+                                <div class="w-12 h-12 rounded-full border-[3px] ${circleColor} flex items-center justify-center font-black text-xs shrink-0 flex-col leading-none shadow-inner bg-slate-50" title="نسبة الإنجاز المستهدفة">
+                                    <span>${completionRate}%</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
+                                <div class="text-center flex-1 border-l border-slate-200">
+                                    <div class="text-[10px] text-slate-500 font-bold mb-0.5">عدد المنجزين</div>
+                                    <div class="text-sm font-black text-brand-600">${results.length}</div>
+                                </div>
+                                <div class="text-center flex-1">
+                                    <div class="text-[10px] text-slate-500 font-bold mb-0.5">المستهدفين للحل</div>
+                                    <div class="text-sm font-black text-slate-800">${targetCount}</div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 flex-grow">
+                                <h5 class="text-[11px] font-black text-slate-800 mb-3"><i class="fa-solid fa-chart-pie text-brand-500 ml-1"></i> مستوى وأداء المتدربين لكل قسم:</h5>
+                                ${standardAveragesHTML}
+                            </div>
+
+                            <div class="mt-auto pt-4 border-t border-slate-100">
+                                <button type="button" onclick="app.toggleStudentsReport('report-${item.id}')" class="w-full py-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:border-brand-300 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-users"></i> استعراض تقرير المنجزين
+                                </button>
+                                
+                                <div id="report-${item.id}" class="hidden mt-3 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-inner border-t-2 border-t-brand-500">
+                                    <div class="max-h-60 overflow-y-auto overflow-x-auto custom-scrollbar">
+                                        <table class="w-full text-right whitespace-nowrap min-w-max">
+                                            <thead class="bg-slate-50 sticky top-0 z-10 shadow-sm">
+                                                ${theadHTML}
+                                            </thead>
+                                            <tbody>
+                                                ${studentsRowsHTML}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    `;
+                    container.innerHTML += cardHTML;
+                });
             }
         }
-
-        const app = new CloudGenerator();
     </script>
 </body>
 </html>
